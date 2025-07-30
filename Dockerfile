@@ -64,4 +64,5 @@ COPY --chown=nextjs:nodejs --from=builder /app/public ./public
 COPY --chown=nextjs:nodejs --from=builder /app/.next/static ./.next/static
 USER nextjs
 EXPOSE 3000
-CMD ["node", "server.js"]
+CMD ["node", "server.js", "-H", "0.0.0.0", "-p", "3000"]
+
