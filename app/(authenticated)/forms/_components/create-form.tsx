@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from 'zod'
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -11,39 +11,26 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import type { Treatment } from "@/types/entities/treatment"
-import { getTreatmentsAction } from "@/lib/api/actions/treatment"
 import { createFormAction } from "@/lib/api/actions/form"
+import { TreatmentSelector } from "../../_components/treatment-selector"
 
 const formSchema = z.object({
   name: z.string().min(2, "Campo obrigatório"),
   external_form_id: z.string().min(2, "Campo obrigatório"),
-  treatment_id: z.string().min(1, "Campo obrigatório")
+  treatment_ids: z.array(z.string())
 })
 
 export const CreateForm = () => {
   const [open, setOpen] = useState(false)
-  const [treatments, setTreatments] = useState<Treatment[]>([])
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       external_form_id: "",
-      treatment_id: ""
+      treatment_ids: []
     }
   })
-
-  useEffect(() => {
-    async function fetchTreatments() {
-      const treatments = await getTreatmentsAction()
-
-      setTreatments(treatments)
-    }
-    
-    fetchTreatments()
-  }, [])
 
   async function onSubmitHandle(data: z.infer<typeof formSchema>) {
     try {
@@ -55,7 +42,7 @@ export const CreateForm = () => {
       setOpen(false)
       form.resetField("name")
       form.resetField("external_form_id")
-      form.resetField("treatment_id")
+      form.resetField("treatment_ids")
     } catch (error) {
       console.error("Error creating form: ", error)
       toast.error("Erro ao criar formulário, tente novamente mais tarde.")
@@ -102,33 +89,17 @@ export const CreateForm = () => {
                   </FormItem>
                 )}
               />
-              <FormField 
+              <FormField
                 control={form.control}
-                name="treatment_id"
+                name="treatment_ids"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Tratamento:</FormLabel>
+                    <FormLabel>Tratamentos</FormLabel>
                     <FormControl>
-                      <Select 
-                        onValueChange={field.onChange}
+                      <TreatmentSelector 
                         value={field.value}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Selecione um tratamento" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectGroup>
-                            {treatments.map(treatment => (
-                              <SelectItem
-                                key={treatment.id} 
-                                value={treatment.id}
-                              >
-                                {treatment.name}
-                              </SelectItem>
-                            ))}
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
+                        onChange={field.onChange}
+                      />
                     </FormControl>
                   </FormItem>
                 )}

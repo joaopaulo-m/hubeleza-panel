@@ -1,13 +1,11 @@
 import { getFormsAction } from "@/lib/api/actions/form";
 import { FormItem } from "./_components/form-item";
 import { CreateForm } from "./_components/create-form";
-import { getTreatmentsAction } from "@/lib/api/actions/treatment";
 
 export const dynamic = "force-dynamic";
 
 export default async function FormsPage() {
   const forms = await getFormsAction()
-  const treatments = await getTreatmentsAction()
 
   return (
     <div className="space-y-6">
@@ -27,7 +25,7 @@ export default async function FormsPage() {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tratamento</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tratamentos</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID Externo</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Leads</th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
@@ -38,7 +36,6 @@ export default async function FormsPage() {
                 <FormItem 
                   key={form.id}
                   form={form}
-                  treatments={treatments}
                 />
               ))}
             </tbody>

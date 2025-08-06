@@ -9,6 +9,7 @@ const BASE_PATH = "/treatments"
 
 interface CreateTreatmentProps {
   name: string
+  price: number
 }
 
 interface UpdateTreatmentProps {
@@ -24,7 +25,8 @@ export const getTreatmentsAction = async () => {
 
 export const createTreatmentAction = async (props: CreateTreatmentProps) => {
   await apiClient.post<void>(BASE_PATH, {
-    name: props.name
+    name: props.name,
+    price: props.price
   })
 
   revalidateTag("treatments")

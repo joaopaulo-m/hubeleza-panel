@@ -12,9 +12,11 @@ import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogT
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { createTreatmentAction } from "@/lib/api/actions/treatment"
+import { CurrencyInput } from "@/components/ui/currency-input"
 
 const formSchema = z.object({
   name: z.string().min(2, "Campo obrigatório"),
+  price: z.number().min(0, "Campo obrigatório")
 })
 
 export const CreateTreatmentForm = () => {
@@ -24,6 +26,7 @@ export const CreateTreatmentForm = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
+      price: 0,
     }
   })
 
@@ -66,6 +69,19 @@ export const CreateTreatmentForm = () => {
                     <FormLabel>Nome do tratamento:</FormLabel>
                     <FormControl>
                       <Input placeholder="Ex.: Fios de PDO" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField 
+                control={form.control}
+                name="price"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Preço do tratamento:</FormLabel>
+                    <FormControl>
+                      <CurrencyInput {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

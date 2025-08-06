@@ -7,11 +7,10 @@ import type { Treatment } from "@/types/entities/treatment";
 
 interface FormItemProps {
   form: Form
-  treatments: Treatment[]
 }
 
 export function FormItem(props: FormItemProps) {
-  const { form, treatments } = props;
+  const { form } = props;
 
   return (
     <tr key={form.id} className="hover:bg-gray-50">
@@ -25,7 +24,7 @@ export function FormItem(props: FormItemProps) {
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-          {treatments.find(treatment => treatment.id === form.treatment_id)?.name}
+          {form.treatments.map(treatment => treatment.name).join(", ")}
         </span>
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

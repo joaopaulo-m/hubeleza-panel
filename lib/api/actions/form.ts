@@ -8,13 +8,14 @@ const BASE_PATH = "/forms"
 
 type CreateFormProps = {
   name: string
-  treatment_id: string
+  treatment_ids: string[]
   external_form_id: string
 }
 type UpdateFormProps = {
   form_id: string
   name: string
   external_form_id?: string
+  treatment_ids: string[]
 }
 
 export const getFormsAction = async () => {
@@ -31,7 +32,8 @@ export const createFormAction = async (props: CreateFormProps) => {
 export const updateFormAction = async (props: UpdateFormProps) => {
   await apiClient.patch<void>(`${BASE_PATH}/${props.form_id}`, {
     name: props.name,
-    external_form_id: props.external_form_id
+    external_form_id: props.external_form_id,
+    treatment_ids: props.treatment_ids
   })
 
   revalidateTag("forms")

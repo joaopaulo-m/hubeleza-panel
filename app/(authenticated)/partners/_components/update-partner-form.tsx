@@ -28,6 +28,7 @@ import type { Partner } from "@/types/entities/partner"
 import { getTreatmentsAction } from "@/lib/api/actions/treatment"
 import { updatePartnerAction } from "@/lib/api/actions/partner"
 import { MaskedInput } from "@/components/ui/masked-input"
+import { TreatmentSelector } from "../../_components/treatment-selector"
 
 const formSchema = z.object({
   name: z.string().min(1, "Campo obrigatório"),
@@ -159,36 +160,10 @@ export const UpdatePartnerForm = ({ partner }: Props) => {
                   <FormItem>
                     <FormLabel>Tratamentos</FormLabel>
                     <FormControl>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button variant="outline" className="w-full justify-start text-left font-normal">
-                            {field.value.length > 0
-                              ? `${field.value.length} tratamento(s) selecionado(s)`
-                              : "Selecione tratamentos"}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-[300px] max-h-64 overflow-y-auto p-2">
-                          <ScrollArea className="h-48">
-                            {treatments.map((treatment) => (
-                              <div key={treatment.id} className="flex items-center space-x-2 p-2 rounded hover:bg-muted cursor-pointer">
-                                <Checkbox
-                                  id={treatment.id}
-                                  checked={field.value.includes(treatment.id)}
-                                  onCheckedChange={(checked) => {
-                                    const selected = field.value
-                                    if (checked) {
-                                      form.setValue("treatment_ids", [...selected, treatment.id])
-                                    } else {
-                                      form.setValue("treatment_ids", selected.filter(id => id !== treatment.id))
-                                    }
-                                  }}
-                                />
-                                <label htmlFor={treatment.id} className="text-sm">{treatment.name}</label>
-                              </div>
-                            ))}
-                          </ScrollArea>
-                        </PopoverContent>
-                      </Popover>
+                      <TreatmentSelector 
+                        value={field.value}
+                        onChange={field.onChange}
+                      />
                     </FormControl>
                   </FormItem>
                 )}

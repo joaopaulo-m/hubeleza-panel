@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from 'zod'
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -17,16 +17,9 @@ import {
   Form, FormControl, FormField, FormItem, FormLabel
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import {
-  Popover, PopoverContent, PopoverTrigger
-} from "@/components/ui/popover"
-import { Checkbox } from "@/components/ui/checkbox"
-import { ScrollArea } from "@/components/ui/scroll-area"
-
-import type { Treatment } from "@/types/entities/treatment"
-import { getTreatmentsAction } from "@/lib/api/actions/treatment"
 import { createPartnerAction } from "@/lib/api/actions/partner"
 import { MaskedInput } from "@/components/ui/masked-input"
+import { TreatmentSelector } from "../../_components/treatment-selector"
 
 const formSchema = z.object({
   name: z.string().min(1, "Campo obrigatório"),
@@ -37,7 +30,6 @@ const formSchema = z.object({
 
 export const CreatePartnerForm = () => {
   const [open, setOpen] = useState(false)
-  const [treatments, setTreatments] = useState<Treatment[]>([])
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -48,14 +40,6 @@ export const CreatePartnerForm = () => {
       treatment_ids: []
     }
   })
-
-  useEffect(() => {
-    async function fetchTreatments() {
-      const data = await getTreatmentsAction()
-      setTreatments(data)
-    }
-    fetchTreatments()
-  }, [])
 
   function unmask(value: string) {
     return value.replace(/\D/g, '')
@@ -148,36 +132,10 @@ export const CreatePartnerForm = () => {
                   <FormItem>
                     <FormLabel>Tratamentos</FormLabel>
                     <FormControl>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button variant="outline" className="w-full justify-start text-left font-normal">
-                            {field.value.length > 0
-                              ? `${field.value.length} tratamento(s) selecionado(s)`
-                              : "Selecione tratamentos"}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-[300px] max-h-64 overflow-y-auto p-2">
-                          <ScrollArea className="h-48">
-                            {treatments.map((treatment) => (
-                              <div key={treatment.id} className="flex items-center space-x-2 p-2 rounded hover:bg-muted cursor-pointer">
-                                <Checkbox
-                                  id={treatment.id}
-                                  checked={field.value.includes(treatment.id)}
-                                  onCheckedChange={(checked) => {
-                                    const selected = field.value
-                                    if (checked) {
-                                      form.setValue("treatment_ids", [...selected, treatment.id])
-                                    } else {
-                                      form.setValue("treatment_ids", selected.filter(id => id !== treatment.id))
-                                    }
-                                  }}
-                                />
-                                <label htmlFor={treatment.id} className="text-sm">{treatment.name}</label>
-                              </div>
-                            ))}
-                          </ScrollArea>
-                        </PopoverContent>
-                      </Popover>
+                      <TreatmentSelector 
+                        value={field.value}
+                        onChange={field.onChange}
+                      />
                     </FormControl>
                   </FormItem>
                 )}

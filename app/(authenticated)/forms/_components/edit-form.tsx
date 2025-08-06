@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form"
 import { z } from 'zod'
 import { zodResolver } from "@hookform/resolvers/zod"
 import { toast } from "sonner"
-import { Edit, Plus } from "lucide-react"
+import { Edit } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
@@ -13,6 +13,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input"
 import { updateFormAction } from "@/lib/api/actions/form"
 import type { Form as FormType } from "@/types/entities/form"
+import { TreatmentSelector } from "../../_components/treatment-selector"
 
 interface EditFormProps {
   form: FormType
@@ -21,6 +22,7 @@ interface EditFormProps {
 const formSchema = z.object({
   name: z.string().min(2, "Campo obrigatório"),
   external_form_id: z.string().min(2, "Campo obrigatório"),
+  treatment_ids: z.array(z.string())
 })
 
 export const EditForm = (props: EditFormProps) => {
@@ -30,7 +32,8 @@ export const EditForm = (props: EditFormProps) => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: props.form.name,
-      external_form_id: props.form.external_form_id
+      external_form_id: props.form.external_form_id,
+      treatment_ids: props.form.treatments.map(treatment => treatment.id)
     }
   })
 
@@ -39,7 +42,8 @@ export const EditForm = (props: EditFormProps) => {
       await updateFormAction({
         form_id: props.form.id,
         name: data.name,
-        external_form_id: data.external_form_id !== props.form.external_form_id ? data.external_form_id : undefined
+        external_form_id: data.external_form_id !== props.form.external_form_id ? data.external_form_id : undefined,
+        treatment_ids: data.treatment_ids
       })
 
       toast.success("Formulário editado com sucesso")
@@ -89,6 +93,21 @@ export const EditForm = (props: EditFormProps) => {
                       <Input {...field} />
                     </FormControl>
                     <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="treatment_ids"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tratamentos</FormLabel>
+                    <FormControl>
+                      <TreatmentSelector 
+                        value={field.value}
+                        onChange={field.onChange}
+                      />
+                    </FormControl>
                   </FormItem>
                 )}
               />

@@ -5,6 +5,8 @@ import { EditTreatmentForm } from "./edit-treatment-form"
 import { TreatmentItemOptions } from "./treatment-item-options"
 import { getTreatmentDataAction } from "@/lib/api/actions/dashboard"
 import { TreatmentDetailsDialog } from "./treatment-details-dialog"
+import { formatCurrency } from "@/lib/utils"
+import { Separator } from "@/components/ui/separator"
 
 export interface TreatmentItemProps {
   treatment: Treatment
@@ -29,6 +31,13 @@ export const TreatmentItem = async (props: TreatmentItemProps) => {
       
       <div className="space-y-3">
         <div className="flex items-center justify-between">
+          <span className="text-base text-gray-500">Preço</span>
+          <span className="text-base font-medium text-gray-950">{formatCurrency(treatment.price)}</span>
+        </div>
+        <Separator 
+          className="w-full my-4"
+        />
+        <div className="flex items-center justify-between">
           <span className="text-sm text-gray-500">Formulários</span>
           <span className="text-sm font-medium text-gray-900">{treatmentData.form_count}</span>
         </div>
@@ -42,7 +51,7 @@ export const TreatmentItem = async (props: TreatmentItemProps) => {
         </div>
       </div>
       
-      <div className="mt-4 pt-4 border-t border-gray-200">
+      <div className="mt-4 pt-4">
         <div className="flex space-x-2">
           <TreatmentDetailsDialog 
             name={treatment.name}
