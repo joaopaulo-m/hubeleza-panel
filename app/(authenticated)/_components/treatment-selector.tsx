@@ -1,11 +1,12 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Input } from "@/components/ui/input"
 import type { Treatment } from "@/types/entities/treatment"
 import { getTreatmentsAction } from "@/lib/api/actions/treatment"
-import { Check, ChevronsUpDown } from "lucide-react"
+import { Check, ChevronsUpDown, Search } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface TreatmentSelectorProps {
@@ -28,6 +29,24 @@ export function TreatmentSelector({
   const [treatments, setTreatments] = useState<Treatment[]>(preloadedTreatments || [])
   const [loading, setLoading] = useState(!preloadedTreatments)
   const [open, setOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
+
+  // Filtrar tratamentos com performance otimizada usando useMemo
+  const filteredTreatments = useMemo(() => {
+    if (!searchQuery.trim()) return treatments
+
+    const normalizeString = (str: string) => 
+      str.toLowerCase()
+         .normalize('NFD')
+         .replace(/[\u0300-\u036f]/g, '') // Remove acentos
+         .trim()
+
+    const normalizedQuery = normalizeString(searchQuery)
+    
+    return treatments.filter(treatment => 
+      normalizeString(treatment.name).includes(normalizedQuery)
+    )
+  }, [treatments, searchQuery])
 
   // Buscar tratamentos se não foram pré-carregados
   useEffect(() => {
@@ -72,13 +91,23 @@ export function TreatmentSelector({
     onChange([])
   }
 
-  // Função para selecionar todos
+  // Função para selecionar todos (apenas os filtrados)
   const selectAll = () => {
-    onChange(treatments.map(t => t.id))
+    const filteredIds = filteredTreatments.map(t => t.id)
+    const newSelection = [...new Set([...value, ...filteredIds])]
+    onChange(newSelection)
+  }
+
+  // Limpar busca quando fechar
+  const handleOpenChange = (newOpen: boolean) => {
+    setOpen(newOpen)
+    if (!newOpen) {
+      setSearchQuery("")
+    }
   }
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
@@ -122,18 +151,35 @@ export function TreatmentSelector({
           </div>
         </div>
 
+        {/* Barra de Pesquisa */}
+        <div className="px-3 py-2 border-b">
+          <div className="relative">
+            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Pesquisar tratamentos..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-8 h-8 text-sm"
+              autoFocus={false}
+            />
+          </div>
+        </div>
+
         {loading ? (
           <div className="p-4 text-center text-sm text-muted-foreground">
             Carregando tratamentos...
           </div>
-        ) : treatments.length === 0 ? (
+        ) : filteredTreatments.length === 0 ? (
           <div className="p-4 text-center text-sm text-muted-foreground">
-            Nenhum tratamento encontrado
+            {searchQuery ? 
+              `Nenhum tratamento encontrado para "${searchQuery}"` : 
+              "Nenhum tratamento encontrado"
+            }
           </div>
         ) : (
           <ScrollArea className="h-48">
             <div className="p-1">
-              {treatments.map((treatment) => (
+              {filteredTreatments.map((treatment) => (
                 <div
                   key={treatment.id}
                   className={cn(
