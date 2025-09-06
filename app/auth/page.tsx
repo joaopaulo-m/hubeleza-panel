@@ -1,221 +1,247 @@
 'use client'
 
-import React, { useState } from 'react';
-import { Key, ArrowRight, Shield, Zap, Globe, Eye, EyeOff } from 'lucide-react';
+import { useState } from "react"
+import { useForm } from "react-hook-form"
+import { z } from 'zod'
+import { zodResolver } from "@hookform/resolvers/zod"
+import { Eye, EyeOff, Mail, Lock, Loader2, CheckCircle2 } from "lucide-react"
+import Image from "next/image"
 
-import { authenticateWithApiKey } from '@/lib/api/actions/auth';
-import { toast } from 'sonner';
+import { Button } from "@/components/ui/button"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import { authenticateWithEmailAndPassword, getAccountType } from "@/lib/api/actions/auth"
+import { toast } from "sonner"
+import { useRouter } from "next/navigation"
+import { AccountType } from "@/types/enums/account-type"
 
-const AuthPage = () => {
-  const [apiKey, setApiKey] = useState('');
-  const [showApiKey, setShowApiKey] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+const loginSchema = z.object({
+  email: z
+    .string()
+    .min(1, "E-mail é obrigatório")
+    .email("Por favor, digite um e-mail válido"),
+  password: z
+    .string()
+    .min(1, "Senha é obrigatória")
+    .min(4, "A senha deve ter pelo menos 4 caracteres")
+})
 
-  const handleSubmit = async (e: any) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError('');
+type LoginFormValues = z.infer<typeof loginSchema>
 
-    try {
-      const formData = new FormData()
-      formData.append("apiKey", apiKey)
+export default function LoginPage() {
+  const [showPassword, setShowPassword] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
-      await authenticateWithApiKey(formData)
-    } catch (err) {
-      console.error("Error authenticating: ", err)
-      toast.error("Chave inválida")
-    } finally {
-      setIsLoading(false);
-      setApiKey("")
-    }
-  };
-
-  const features = [
-    {
-      icon: Shield,
-      title: 'Segurança Avançada',
-      description: 'Proteção de dados com criptografia de ponta a ponta'
+  const router = useRouter()
+  const form = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: ""
     },
-    {
-      icon: Zap,
-      title: 'Performance Otimizada',
-      description: 'Distribuição de leads em tempo real com alta velocidade'
-    },
-    {
-      icon: Globe,
-      title: 'Alcance Nacional',
-      description: 'Cobertura completa para clínicas em todo o território'
+    mode: "onBlur"
+  })
+
+  async function onSubmit(data: LoginFormValues) {
+    setIsLoading(true)
+    
+    const { success, account_type } = await authenticateWithEmailAndPassword({
+      email: data.email,
+      password: data.password
+    })
+
+    if (!success) {
+      toast.error("Erro ao autenticar", {
+        description: "Credenciais inválidas"
+      })
+
+      setIsLoading(false)
+      return
     }
-  ];
+
+    toast.success("Autenticação feita com sucesso")
+    setTimeout(() => {
+      setIsLoading(false)
+
+      if (account_type === AccountType.ADMIN || account_type === AccountType.OPERATOR) {
+        router.push("/dashboard")
+      } else if (account_type === AccountType.PARTNER) {
+        router.push("/partner/home")
+      } else {
+        toast.error("Não foi possível encontrar o tipo da conta.")
+      }
+    }, 1200)
+  }
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword)
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex">
-      {/* Left Panel - Branding & Features */}
-      <div className="hidden lg:flex lg:flex-1 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20"></div>
-        <div className="absolute inset-0">
-          <div className="absolute top-20 left-20 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-20 right-20 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"></div>
-          <div className="absolute top-1/2 left-1/3 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl"></div>
-        </div>
-        
-        <div className="relative z-10 flex flex-col justify-center px-16 py-12">
-          <div className="mb-12">
-            <div className="flex items-center space-x-3 mb-6">
-              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-                <Shield className="w-6 h-6 text-white" />
+    <div className="max-h-screen overflow-hidden min-h-screen bg-gray-50">
+      <div className="flex min-h-screen">
+        {/* Seção esquerda - Hero/Brand */}
+        <div className="hidden lg:flex lg:w-1/2 relative bg-white">
+          <div className="flex flex-col justify-center w-full px-12 xl:px-16">
+            {/* Logo/Brand area */}
+            <div className="mb-12">
+              <div className="flex items-center mb-8">
+                <Image 
+                  src="/logo.png"
+                  alt="Logo"
+                  width={220}
+                  height={100}
+                />
               </div>
-              <h1 className="text-3xl font-bold text-white">MaxLeads</h1>
-            </div>
-            <h2 className="text-4xl font-bold text-white mb-4 leading-tight">
-              Conecte-se ao futuro da
-              <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent"> gestão de leads</span>
-            </h2>
-            <p className="text-xl text-slate-300 leading-relaxed">
-              Transforme leads em oportunidades reais com nossa plataforma inteligente de distribuição para clínicas de estética.
-            </p>
-          </div>
-
-          <div className="space-y-6">
-            {features.map((feature, index) => (
-              <div key={index} className="flex items-start space-x-4 group">
-                <div className="w-12 h-12 bg-white/10 backdrop-blur-sm rounded-lg flex items-center justify-center group-hover:bg-white/20 transition-colors">
-                  <feature.icon className="w-6 h-6 text-blue-400" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-white mb-1">{feature.title}</h3>
-                  <p className="text-slate-400">{feature.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-12 pt-8 border-t border-white/10">
-            <div className="flex items-center space-x-6 text-slate-400">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-white">1.2K+</div>
-                <div className="text-sm">Leads processados</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-white">150+</div>
-                <div className="text-sm">Clínicas parceiras</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-white">99.9%</div>
-                <div className="text-sm">Uptime</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Right Panel - Authentication Form */}
-      <div className="flex-1 lg:max-w-md xl:max-w-lg flex items-center justify-center p-8">
-        <div className="w-full max-w-md">
-          {/* Mobile Logo */}
-          <div className="lg:hidden text-center mb-8">
-            <div className="inline-flex items-center space-x-3 mb-4">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <Shield className="w-5 h-5 text-white" />
-              </div>
-              <h1 className="text-2xl font-bold text-white">MaxLeads</h1>
-            </div>
-          </div>
-
-          {/* Auth Card */}
-          <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8">
-            <div className="text-center mb-8">
-              <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Key className="w-8 h-8 text-white" />
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Bem-vindo de volta</h2>
-              <p className="text-gray-600">Insira sua chave API para acessar o painel</p>
-            </div>
-
-            <div className="space-y-6">
-              <div>
-                <label htmlFor="apiKey" className="block text-sm font-medium text-gray-700 mb-2">
-                  Chave API
-                </label>
-                <div className="relative">
-                  <input
-                    id="apiKey"
-                    type={showApiKey ? "text" : "password"}
-                    value={apiKey}
-                    onChange={(e) => setApiKey(e.target.value)}
-                    placeholder="Insira sua chave API"
-                    className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowApiKey(!showApiKey)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
-                  >
-                    {showApiKey ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                  </button>
-                </div>
-                {error && (
-                  <p className="mt-2 text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg border border-red-200">
-                    {error}
-                  </p>
-                )}
-              </div>
-
-              <button
-                type="button"
-                disabled={!apiKey.trim() || isLoading}
-                onClick={handleSubmit}
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-xl font-medium hover:from-blue-700 hover:to-purple-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center space-x-2 group"
-              >
-                {isLoading ? (
-                  <div className="flex items-center space-x-2">
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    <span>Autenticando...</span>
-                  </div>
-                ) : (
-                  <>
-                    <span>Acessar Painel</span>
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </>
-                )}
-              </button>
-            </div>
-
-            <div className="mt-8 pt-6 border-t border-gray-200 text-center">
-              <p className="text-sm text-gray-500">
-                Precisa de ajuda?{' '}
-                <a href="#" className="text-blue-600 hover:text-blue-700 font-medium transition-colors">
-                  Entre em contato
-                </a>
+              <h1 className="text-2xl xl:text-3xl font-semibold text-gray-900 mb-6 leading-tight">
+                Acesse sua clínica ao alcance de um clique
+              </h1>
+              <p className="text-base xl:text-lg text-gray-600 leading-relaxed max-w-lg">
+                Conecte-se para receber leads qualificados, gerenciar seus atendimentos e acompanhar o crescimento da sua clínica de forma simples e segura.
               </p>
             </div>
-          </div>
 
-          {/* Security Notice */}
-          <div className="mt-6 bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20">
-            <div className="flex items-start space-x-3">
-              <Shield className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="text-sm text-white font-medium mb-1">Segurança Garantida</p>
-                <p className="text-xs text-slate-300">
-                  Sua chave API é criptografada e armazenada com segurança. Nunca compartilhamos seus dados.
-                </p>
+            {/* Features list */}
+            <div className="space-y-4">
+              <div className="flex items-center text-gray-700">
+                <div className="w-2 h-2 bg-purple-500 rounded-full mr-3"></div>
+                <span>Mais pacientes chegando até você</span>
+              </div>
+              <div className="flex items-center text-gray-700">
+                <div className="w-2 h-2 bg-violet-500 rounded-full mr-3"></div>
+                <span>Segurança e privacidade garantidas</span>
+              </div>
+              <div className="flex items-center text-gray-700">
+                <div className="w-2 h-2 bg-indigo-500 rounded-full mr-3"></div>
+                <span>Gestão rápida e prática do seu fluxo de atendimento</span>
               </div>
             </div>
           </div>
+          
+          {/* Decorative elements */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-purple-100 to-transparent rounded-full -translate-y-32 translate-x-32"></div>
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-tl from-violet-50 to-transparent rounded-full translate-y-48 translate-x-48"></div>
+        </div>
 
-          {/* Demo Hint */}
-          <div className="mt-4 text-center">
-            <p className="text-xs text-slate-400">
-              
-            </p>
+        {/* Seção direita - Formulário */}
+        <div className="flex-1 flex flex-col justify-center bg-white lg:bg-gray-50">
+          <div className="w-full max-w-md mx-auto px-6 sm:px-8">
+            
+            {/* Mobile header */}
+            <div className="lg:hidden text-center mb-8">
+              <div className="w-16 h-16 bg-gradient-to-r from-purple-600 to-violet-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <CheckCircle2 className="w-8 h-8 text-white" />
+              </div>
+              <h1 className="text-2xl font-bold text-gray-900">MeuApp</h1>
+            </div>
+
+            {/* Card container */}
+            <div className="bg-white rounded-2xl shadow-xl p-8 lg:shadow-2xl">
+              {/* Header */}
+              <div className="text-center mb-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Entrar na conta</h2>
+                <p className="text-gray-600">Digite seus dados para continuar</p>
+              </div>
+
+              {/* Form */}
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                  
+                  {/* Email Field */}
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium text-gray-700 mb-2">
+                          Endereço de e-mail
+                        </FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                            <Input
+                              type="email"
+                              placeholder="Digite seu e-mail"
+                              className="pl-12 h-14 text-base border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all duration-200 bg-gray-50 focus:bg-white"
+                              {...field}
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage className="text-sm mt-1" />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Password Field */}
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm font-medium text-gray-700 mb-2">
+                          Senha
+                        </FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                            <Input
+                              type={showPassword ? "text" : "password"}
+                              placeholder="Digite sua senha"
+                              className="pl-12 pr-12 h-14 text-base border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all duration-200 bg-gray-50 focus:bg-white"
+                              {...field}
+                            />
+                            <button
+                              type="button"
+                              onClick={togglePasswordVisibility}
+                              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1"
+                            >
+                              {showPassword ? (
+                                <EyeOff className="w-5 h-5" />
+                              ) : (
+                                <Eye className="w-5 h-5" />
+                              )}
+                            </button>
+                          </div>
+                        </FormControl>
+                        <FormMessage className="text-sm mt-1" />
+                      </FormItem>
+                    )}
+                  />
+                  {/* Submit Button */}
+                  <Button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full h-14 bg-[#740499] hover:bg-purple-800 text-white font-medium text-base rounded-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                        Entrando...
+                      </>
+                    ) : (
+                      "Entrar na conta"
+                    )}
+                  </Button>
+                </form>
+              </Form>
+            </div>
+
+            {/* Footer */}
+            <div className="text-center mt-8">
+              <p className="text-xs text-gray-500">
+                Ao continuar, você concorda com nossos{" "}
+                <button className="underline hover:text-gray-700 transition-colors">
+                  Termos de Uso
+                </button>{" "}
+                e{" "}
+                <button className="underline hover:text-gray-700 transition-colors">
+                  Política de Privacidade
+                </button>
+              </p>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  );
-};
-
-export default AuthPage;
+  )
+}

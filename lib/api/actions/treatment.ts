@@ -10,6 +10,8 @@ const BASE_PATH = "/treatments"
 interface CreateTreatmentProps {
   name: string
   price: number
+  category: string
+  state_prices: { state: string, price: number }[]
 }
 
 interface UpdateTreatmentProps {
@@ -17,8 +19,23 @@ interface UpdateTreatmentProps {
   name: string
 }
 
-export const getTreatmentsAction = async () => {
-  const treatments = await apiClient.get<Treatment[]>(BASE_PATH, { tags: ["treatments"] })
+interface GetTreatmentsProps {
+  name?: string
+  category?: string
+}
+
+export const getTreatmentsAction = async (props?: GetTreatmentsProps) => {
+  const query = new URLSearchParams();
+
+  if (props) {
+    if (props.name) query.append("name", props.name);
+    if (props.category) query.append("category", props.category);
+  }
+
+  const queryString = query.toString();
+  const url = `${BASE_PATH}${queryString ? `?${queryString}` : ""}`;
+
+  const treatments = await apiClient.get<Treatment[]>(url, { tags: ["treatments"] })
 
   return treatments
 }
@@ -26,7 +43,9 @@ export const getTreatmentsAction = async () => {
 export const createTreatmentAction = async (props: CreateTreatmentProps) => {
   await apiClient.post<void>(BASE_PATH, {
     name: props.name,
-    price: props.price
+    price: props.price,
+    category: props.category,
+    state_prices: props.state_prices
   })
 
   revalidateTag("treatments")

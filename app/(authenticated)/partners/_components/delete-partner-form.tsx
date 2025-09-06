@@ -16,9 +16,9 @@ export function DeletePartner(props: DeletePartnerProps) {
     try {
       await deletePartnerAction(props.partner_id)
 
-      toast.success("Partner deletado com sucesso")
+      toast.success("Parceiro deletado com sucesso")
     } catch {
-      toast.error("Erro ao deletar partner")
+      toast.error("Erro ao deletar parceiro")
     } finally {
       props.onOpenChange(false)
     }
@@ -28,11 +28,11 @@ export function DeletePartner(props: DeletePartnerProps) {
     <AlertDialog open={props.open} onOpenChange={props.onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Tem certeza que deseja deletar o partner?</AlertDialogTitle>
+          <AlertDialogTitle>Tem certeza que deseja deletar o parceiro?</AlertDialogTitle>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
-          <AlertDialogAction onClick={onDeletePartnerClick}>Deletar partner</AlertDialogAction>
+          <AlertDialogAction onClick={onDeletePartnerClick}>Deletar parceiro</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

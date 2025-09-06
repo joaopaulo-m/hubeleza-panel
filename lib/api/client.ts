@@ -26,10 +26,10 @@ class ApiClient {
       defaultHeaders['Content-Type'] = 'application/json';
     }
 
-    // Always add API key to headers
-    const apiKey = await this.getApiKey();
-    if (apiKey) {
-      defaultHeaders['api-key'] = apiKey;
+    // Always add access token to headers
+    const accessToken = await this.getAccessToken();
+    if (accessToken) {
+      defaultHeaders['Authorization'] = `Bearer ${accessToken}`;
     }
 
     const finalHeaders = {
@@ -77,22 +77,61 @@ class ApiClient {
     }
   }
 
-  private async getApiKey(): Promise<string | null> {
+  async download(endpoint: string): Promise<Blob> {
+    const url = `${this.baseUrl}${endpoint}`;
+  
+    const defaultHeaders: Record<string, string> = {};
+  
+    const accessToken = await this.getAccessToken();
+    if (accessToken) {
+      defaultHeaders['Authorization'] = `Bearer ${accessToken}`;
+    }
+  
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: defaultHeaders,
+      });
+  
+      if (!response.ok) {
+        throw new ApiError(
+          `Erro ao baixar arquivo: ${response.status}`,
+          response.status,
+          await response.text()
+        );
+      }
+  
+      // Verificar se é realmente CSV
+      const contentType = response.headers.get('content-type');
+      if (!contentType?.includes('text/csv')) {
+        console.warn('Content-Type não é CSV:', contentType);
+      }
+  
+      // Criar blob com o tipo correto e encoding
+      const arrayBuffer = await response.arrayBuffer();
+      return new Blob([arrayBuffer], { 
+        type: 'text/csv;charset=utf-8' 
+      });
+    } catch (error) {
+      if (error instanceof ApiError) {
+        throw error;
+      }
+      throw new ApiError('Erro de rede ao baixar o arquivo', 500);
+    }
+  }
+
+  private async getAccessToken(): Promise<string | null> {
     try {
       const cookieStore = await cookies();
-      const apiKeyFromCookie = cookieStore.get('api-key')?.value;
+      const tokenFromCookies = cookieStore.get('access-token')?.value;
       
-      if (apiKeyFromCookie) {
-        return apiKeyFromCookie;
+      if (tokenFromCookies) {
+        return tokenFromCookies;
       }
 
-      // Fallback to header (useful for API routes)
-      const headersList = await headers();
-      const apiKeyFromHeader = headersList.get('x-api-key');
-      
-      return apiKeyFromHeader;
+      return null
     } catch (error) {
-      console.error('Error getting API key:', error);
+      console.error('Error getting access token:', error);
       return null;
     }
   }

@@ -52,13 +52,13 @@ export const CreateForm = () => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button 
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2 cursor-pointer">
+        <Button 
+          className="px-4 py-2 rounded-lg flex items-center space-x-1 cursor-pointer">
           <Plus className="w-4 h-4" />
           <span>Novo Formulário</span>
-        </button>
+        </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="min-w-[55vw]">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmitHandle)}>
             <DialogHeader>

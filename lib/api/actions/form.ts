@@ -18,8 +18,23 @@ type UpdateFormProps = {
   treatment_ids: string[]
 }
 
-export const getFormsAction = async () => {
-  const forms = await apiClient.get<Form[]>(BASE_PATH, { tags: ["forms"] })
+interface GetFormsActionProps {
+  name?: string
+  treatment_ids?: string
+}
+
+export const getFormsAction = async (props: GetFormsActionProps) => {
+  const query = new URLSearchParams();
+
+  if (props.name) query.append("name", props.name);
+  if (props.treatment_ids) query.append("treatment_ids", props.treatment_ids);
+
+  const queryString = query.toString();
+  const url = `${BASE_PATH}${queryString ? `?${queryString}` : ""}`;
+
+  const forms = await apiClient.get<Form[]>(url, {
+    tags: ["forms"],
+  });
 
   return forms
 }

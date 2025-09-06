@@ -1,10 +1,9 @@
 import { Building2, Edit, MapPin, MoreHorizontal } from "lucide-react"
 
 import type { Partner } from "@/types/entities/partner"
-import { UpdatePartnerForm } from "./update-partner-form"
 import { PartnerDetailsDialog } from "./partner-details-dialog"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { PartnerItemOptions } from "./partner-item-options"
+import Link from "next/link"
 
 interface PartnerItemProps {
   partner: Partner
@@ -14,11 +13,11 @@ export const PartnerItem = (props: PartnerItemProps) => {
   const { partner } = props
 
   return (
-    <div key={partner.id} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+    <Link href={`/partners/${partner.id}`} key={partner.id} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between">
         <div className="flex items-center space-x-3">
-          <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-            <Building2 className="w-6 h-6 text-blue-600" />
+          <div className="w-12 h-12 bg-primary/5 rounded-lg flex items-center justify-center">
+            <Building2 className="w-6 h-6 text-primary" />
           </div>
           <div>
             <h4 className="text-lg font-semibold text-gray-900">{partner.name}</h4>
@@ -52,8 +51,7 @@ export const PartnerItem = (props: PartnerItemProps) => {
       
       <div className="mt-4 flex space-x-2">
         <PartnerDetailsDialog partner={partner} />
-        <UpdatePartnerForm partner={partner} />
       </div>
-    </div>
+    </Link>
   )
 }

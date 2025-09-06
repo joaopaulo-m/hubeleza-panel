@@ -1,22 +1,25 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Nunito_Sans, Poppins, Raleway } from "next/font/google";
 import { Toaster } from "sonner";
 
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const raleway = Raleway({
+  variable: "--font-poppins",
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+  weight: [
+    "200",
+    "400",
+    "500",
+    "600",
+    "700",
+    "900"
+  ]
+})
 
 export const metadata: Metadata = {
-  title: "MaxLeads | Painel",
-  description: "MaxLeads",
+  title: "hubeleza | Painel",
+  description: "hubeleza",
 };
 
 export default function RootLayout({
@@ -27,7 +30,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${raleway.className} antialiased`}
       >
         {children}
         <Toaster />

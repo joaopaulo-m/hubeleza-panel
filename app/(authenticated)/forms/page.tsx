@@ -1,11 +1,22 @@
-import { getFormsAction } from "@/lib/api/actions/form";
-import { FormItem } from "./_components/form-item";
 import { CreateForm } from "./_components/create-form";
+import { FormsFilter } from "./_components/forms-filter";
+import { getTreatmentsAction } from "@/lib/api/actions/treatment";
+import { Suspense } from "react";
+import { FormItemSkeleton } from "./_components/form-item-skeleton";
+import { FormsList } from "./_components/forms-list";
 
 export const dynamic = "force-dynamic";
 
-export default async function FormsPage() {
-  const forms = await getFormsAction()
+type FormsProps = {
+  searchParams: Promise<{
+    name?: string;
+    treatmentIds?: string;
+  }>;
+}
+
+export default async function FormsPage(props: FormsProps) {
+  const searchParams = await props.searchParams
+  const treatments = await getTreatmentsAction()
 
   return (
     <div className="space-y-6">
@@ -13,7 +24,7 @@ export default async function FormsPage() {
         <h1 className="text-2xl font-bold text-gray-900">Formulários</h1>
         <CreateForm />
       </div>
-
+      <FormsFilter treatments={treatments} />
       <div className="bg-white rounded-xl border border-gray-200">
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-center justify-between">
@@ -31,14 +42,17 @@ export default async function FormsPage() {
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {forms.map((form) => (
-                <FormItem 
-                  key={form.id}
-                  form={form}
-                />
-              ))}
-            </tbody>
+            <Suspense fallback={
+              <tbody className="bg-white divide-y divide-gray-200">
+                <FormItemSkeleton />
+                <FormItemSkeleton />
+                <FormItemSkeleton />
+                <FormItemSkeleton />
+                <FormItemSkeleton />
+              </tbody>
+            }>
+              <FormsList name={searchParams.name} treatment_ids={searchParams.treatmentIds}  />
+            </Suspense>
           </table>
         </div>
       </div>

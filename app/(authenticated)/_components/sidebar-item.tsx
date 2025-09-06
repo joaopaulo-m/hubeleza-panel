@@ -14,7 +14,7 @@ const SidebarItem = ({ icon: Icon, label, active, onClick }: SidebarItemProps) =
     onClick={onClick}
     className={`w-full flex items-center px-4 py-3 text-left rounded-lg transition-colors cursor-pointer ${
       active 
-        ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700' 
+        ? 'bg-primary/5 text-primary border-r-2 border-primary' 
         : 'text-gray-600 hover:bg-gray-50'
     }`}
   >
