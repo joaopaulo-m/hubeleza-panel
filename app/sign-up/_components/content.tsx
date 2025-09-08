@@ -21,6 +21,7 @@ import { toast } from "sonner"
 import axios from "axios"
 import { getInviteTokenByTokenAction } from "@/lib/api/actions/invite-token"
 import { AccountPaymentDialog } from "./account-payment-dialog"
+import { authenticateWithEmailAndPassword } from "@/lib/api/actions/auth";
 
 const signupSchema = z
   .object({
@@ -137,6 +138,16 @@ export function PartnerSignupPageContent() {
       toast.error("Erro ao buscar cidade e estado pelo CEP.")
       console.error(err)
     }
+  }
+
+  async function onPaymentSuccess() {
+    await new Promise(async res => setTimeout(res, 1200))
+    await authenticateWithEmailAndPassword({
+      email: form.watch('email'),
+      password: form.watch('password')
+    })
+
+    router.push("/partner/home")
   }
 
   useEffect(() => {
@@ -509,7 +520,7 @@ export function PartnerSignupPageContent() {
       {paymentData && (
         <AccountPaymentDialog 
           {...paymentData}
-          onSuccess={() => alert("ok!")}
+          onSuccess={onPaymentSuccess}
         />
       )}
     </div>

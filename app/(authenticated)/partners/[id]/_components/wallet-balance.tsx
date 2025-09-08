@@ -119,6 +119,8 @@ export function WalletBalance({ wallet, partnerName }: WalletBalanceProps) {
     getCurrentAccountType()
   }, [])
 
+  useEffect(() => console.log("account type: ", accountType), [accountType])
+
   return (
     <div className="space-y-4">
       {/* Balance Overview */}
@@ -130,136 +132,134 @@ export function WalletBalance({ wallet, partnerName }: WalletBalanceProps) {
                 <WalletIcon className="w-5 h-5 text-gray-600" />
                 Saldo Atual
               </div>
-              {accountType && accountType === AccountType.ADMIN && (
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button size="sm" className="bg-gray-900 hover:bg-gray-800">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Recarregar
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <Tabs defaultValue="payment" className="w-full">
-                      <TabsList className="w-full mb-5">
-                        <TabsTrigger value="payment">Gerar pagamento</TabsTrigger>
-                        <TabsTrigger value="bonus">Adicionar bônus</TabsTrigger>
-                      </TabsList>
-                      <TabsContent value="payment">
-                        <DialogHeader className="mb-4">
-                          <DialogTitle>Gerar pagamento de recarga</DialogTitle>
-                          <DialogDescription>
-                            Crie um código PIX copia e cola para recarga de saldo do parceiro
-                          </DialogDescription>
-                        </DialogHeader>
-                        <Form {...form}>
-                          <form onSubmit={form.handleSubmit(onCreateWalletPaymentClick)} className="space-y-4">
-                            <FormField
-                              control={form.control}
-                              name="amount"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Valor</FormLabel>
-                                  <FormControl>
-                                    <CurrencyInput {...field} />
-                                  </FormControl>
-                                </FormItem>
-                              )}
-                            />
-                            <div className="flex gap-2">
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={() => form.setValue("amount", 10000)}
-                              >
-                                R$ 100
-                              </Button>
-                              <Button
-                                variant="outline"
-                                type="button"
-                                size="sm"
-                                onClick={() => form.setValue("amount", 25000)}
-                              >
-                                R$ 250
-                              </Button>
-                              <Button
-                                variant="outline"
-                                type="button"
-                                size="sm"
-                                onClick={() => form.setValue("amount", 50000)}
-                              >
-                                R$ 500
-                              </Button>
-                            </div>
-                            <Button 
-                              className="w-full"
-                              type="submit"
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button size="sm" className="bg-gray-900 hover:bg-gray-800">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Recarregar
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <Tabs defaultValue="payment" className="w-full">
+                    <TabsList className="w-full mb-5">
+                      <TabsTrigger value="payment">Gerar pagamento</TabsTrigger>
+                      <TabsTrigger value="bonus" disabled={accountType !== AccountType.ADMIN}>Adicionar bônus</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="payment">
+                      <DialogHeader className="mb-4">
+                        <DialogTitle>Gerar pagamento de recarga</DialogTitle>
+                        <DialogDescription>
+                          Crie um código PIX copia e cola para recarga de saldo do parceiro
+                        </DialogDescription>
+                      </DialogHeader>
+                      <Form {...form}>
+                        <form onSubmit={form.handleSubmit(onCreateWalletPaymentClick)} className="space-y-4">
+                          <FormField
+                            control={form.control}
+                            name="amount"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Valor</FormLabel>
+                                <FormControl>
+                                  <CurrencyInput {...field} />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          <div className="flex gap-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => form.setValue("amount", 10000)}
                             >
-                              {form.formState.isSubmitting ? "Processando..." : `Recarregar ${formatCurrency(form.watch("amount"))}`}
+                              R$ 100
                             </Button>
-                          </form>
-                        </Form>
-                      </TabsContent>
-                      <TabsContent value="bonus">
-                        <DialogHeader className="mb-4">
-                          <DialogTitle>Adicionar saldo bônus</DialogTitle>
-                          <DialogDescription>
-                            Acrescente créditos na carteira do parceiro
-                          </DialogDescription>
-                        </DialogHeader>
-                        <Form {...form}>
-                          <form onSubmit={form.handleSubmit(onCreditWalletClick)} className="space-y-4">
-                            <FormField
-                              control={form.control}
-                              name="amount"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Valor</FormLabel>
-                                  <FormControl>
-                                    <CurrencyInput {...field} />
-                                  </FormControl>
-                                </FormItem>
-                              )}
-                            />
-                            <div className="flex gap-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                type="button"
-                                onClick={() => form.setValue("amount", 10000)}
-                              >
-                                R$ 100
-                              </Button>
-                              <Button
-                                variant="outline"
-                                type="button"
-                                size="sm"
-                                onClick={() => form.setValue("amount", 25000)}
-                              >
-                                R$ 250
-                              </Button>
-                              <Button
-                                variant="outline"
-                                type="button"
-                                size="sm"
-                                onClick={() => form.setValue("amount", 50000)}
-                              >
-                                R$ 500
-                              </Button>
-                            </div>
-                            <Button 
-                              className="w-full"
-                              type="submit"
+                            <Button
+                              variant="outline"
+                              type="button"
+                              size="sm"
+                              onClick={() => form.setValue("amount", 25000)}
                             >
-                              {form.formState.isSubmitting ? "Processando..." : `Recarregar ${formatCurrency(form.watch("amount"))}`}
+                              R$ 250
                             </Button>
-                          </form>
-                        </Form>
-                      </TabsContent>
-                    </Tabs>
-                  </DialogContent>
-                </Dialog>
-              )}
+                            <Button
+                              variant="outline"
+                              type="button"
+                              size="sm"
+                              onClick={() => form.setValue("amount", 50000)}
+                            >
+                              R$ 500
+                            </Button>
+                          </div>
+                          <Button 
+                            className="w-full"
+                            type="submit"
+                          >
+                            {form.formState.isSubmitting ? "Processando..." : `Recarregar ${formatCurrency(form.watch("amount"))}`}
+                          </Button>
+                        </form>
+                      </Form>
+                    </TabsContent>
+                    <TabsContent value="bonus">
+                      <DialogHeader className="mb-4">
+                        <DialogTitle>Adicionar saldo bônus</DialogTitle>
+                        <DialogDescription>
+                          Acrescente créditos na carteira do parceiro
+                        </DialogDescription>
+                      </DialogHeader>
+                      <Form {...form}>
+                        <form onSubmit={form.handleSubmit(onCreditWalletClick)} className="space-y-4">
+                          <FormField
+                            control={form.control}
+                            name="amount"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Valor</FormLabel>
+                                <FormControl>
+                                  <CurrencyInput {...field} />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              type="button"
+                              onClick={() => form.setValue("amount", 10000)}
+                            >
+                              R$ 100
+                            </Button>
+                            <Button
+                              variant="outline"
+                              type="button"
+                              size="sm"
+                              onClick={() => form.setValue("amount", 25000)}
+                            >
+                              R$ 250
+                            </Button>
+                            <Button
+                              variant="outline"
+                              type="button"
+                              size="sm"
+                              onClick={() => form.setValue("amount", 50000)}
+                            >
+                              R$ 500
+                            </Button>
+                          </div>
+                          <Button 
+                            className="w-full"
+                            type="submit"
+                          >
+                            {form.formState.isSubmitting ? "Processando..." : `Recarregar ${formatCurrency(form.watch("amount"))}`}
+                          </Button>
+                        </form>
+                      </Form>
+                    </TabsContent>
+                  </Tabs>
+                </DialogContent>
+              </Dialog>
             </CardTitle>
           </CardHeader>
           <CardContent>

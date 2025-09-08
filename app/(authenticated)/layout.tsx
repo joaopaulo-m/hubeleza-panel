@@ -2,6 +2,7 @@ import type { ReactNode } from "react"
 
 import { Sidebar } from "./_components/sidebar"
 import { DefinePasswordForm } from "./_components/define-password-form"
+import { ApprovalPendingDialog } from "./_components/approval-pending-dialog"
 
 interface AuthenticatedLayoutProps {
   children: ReactNode
@@ -17,6 +18,7 @@ export default function AuthenticatedLayout(props: AuthenticatedLayoutProps) {
         <main className="p-6">
           {children}
           <DefinePasswordForm />
+          <ApprovalPendingDialog />
         </main>
       </div>
     </div>
