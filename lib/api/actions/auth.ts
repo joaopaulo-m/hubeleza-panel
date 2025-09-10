@@ -9,6 +9,8 @@ import type { Account } from '@/types/entities/account';
 import { getAdmin } from './admin';
 import { getPartner } from './partner';
 import { revalidateTag } from 'next/cache';
+import { getOperatorById } from './operator';
+import { redirect } from 'next/navigation';
 
 interface AuthResponse {
   success: boolean;
@@ -121,6 +123,27 @@ export async function definePasswordAction(password: string) {
     }
   } catch(error) {
     console.error("Error defining password: ", error)
+    return {
+      success: false,
+    }
+  }
+}
+
+export async function sendToDefinePassword(operator_id: string) {
+  try {
+    const operator = await getOperatorById(operator_id)
+    await authenticateWithEmailAndPassword({
+      email: operator.email,
+      password: "00000000"
+    })
+
+    redirect("/partner/home")
+
+    return {
+      success: true
+    }
+  } catch(error) {
+    console.error("Error sending to define password page: ", error)
     return {
       success: false,
     }
