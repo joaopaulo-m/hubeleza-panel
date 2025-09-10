@@ -129,15 +129,13 @@ export async function definePasswordAction(password: string) {
   }
 }
 
-export async function sendToDefinePassword(operator_id: string) {
+export async function sendToDefinePasswordAction(operator_id: string) {
   try {
     const operator = await getOperatorById(operator_id)
     await authenticateWithEmailAndPassword({
       email: operator.email,
       password: "00000000"
     })
-
-    redirect("/partner/home")
 
     return {
       success: true

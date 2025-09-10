@@ -1,16 +1,11 @@
-import { sendToDefinePassword } from "@/lib/api/actions/auth";
+import { Suspense } from "react";
 
-type DefinePasswordPageProps = {
-  searchParams: Promise<{
-    id: string
-  }>;
-}
+import DefinePasswordPageContent from "./_components/content";
 
-export default async function DefinePasswordPage(props: DefinePasswordPageProps) {
-  const searchParams = await props.searchParams
-  await sendToDefinePassword(searchParams.id)
-
+export default async function DefinePasswordPage() {
   return (
-    <div>Carregando...</div>
+    <Suspense fallback={<div>Carregando...</div>}>
+      <DefinePasswordPageContent />
+    </Suspense>
   )
 }
