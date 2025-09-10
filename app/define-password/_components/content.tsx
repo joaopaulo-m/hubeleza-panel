@@ -18,7 +18,9 @@ export default function DefinePasswordPageContent() {
       const { success } = await sendToDefinePasswordAction(params.get('id')?.toString() || "")
 
       if (success) {
-        router.push("/partner/home")
+        setTimeout(() => {
+          router.push("/dashboard")
+        }, 1100)
       } else {
         setError(true)
       }
