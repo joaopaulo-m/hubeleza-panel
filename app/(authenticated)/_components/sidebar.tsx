@@ -58,7 +58,7 @@ const Sidebar = () => {
       
       <nav className="px-4 space-y-2">
         {/* Admin sidebar items */}
-        {accountType === AccountType.ADMIN && (
+        {(accountType === AccountType.ADMIN || accountType === AccountType.OPERATOR) && (
           <>
             <SidebarItem
               icon={LayoutDashboard} 

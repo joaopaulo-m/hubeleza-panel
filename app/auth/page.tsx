@@ -84,8 +84,8 @@ export default function LoginPage() {
         <div className="hidden lg:flex lg:w-1/2 relative bg-white">
           <div className="flex flex-col justify-center w-full px-12 xl:px-16">
             {/* Logo/Brand area */}
-            <div className="mb-12">
-              <div className="flex items-center mb-8">
+            <div className="w-full flex flex-col items-center gap-4">
+              <div className="flex items-center">
                 <Image 
                   src="/logo.png"
                   alt="Logo"
@@ -93,28 +93,16 @@ export default function LoginPage() {
                   height={100}
                 />
               </div>
-              <h1 className="text-2xl xl:text-3xl font-semibold text-gray-900 mb-6 leading-tight">
-                Acesse sua clínica ao alcance de um clique
+              <Image 
+                src="/funnel-illustration.png"
+                width={300}
+                height={300}
+                alt="Logo"
+                // className="mx-auto"
+              />
+              <h1 className="text-xl xl:text-2xl font-semibold text-gray-900 mb-6 leading-tight">
+                Mais leads menos custo
               </h1>
-              <p className="text-base xl:text-lg text-gray-600 leading-relaxed max-w-lg">
-                Conecte-se para receber leads qualificados, gerenciar seus atendimentos e acompanhar o crescimento da sua clínica de forma simples e segura.
-              </p>
-            </div>
-
-            {/* Features list */}
-            <div className="space-y-4">
-              <div className="flex items-center text-gray-700">
-                <div className="w-2 h-2 bg-purple-500 rounded-full mr-3"></div>
-                <span>Mais pacientes chegando até você</span>
-              </div>
-              <div className="flex items-center text-gray-700">
-                <div className="w-2 h-2 bg-violet-500 rounded-full mr-3"></div>
-                <span>Segurança e privacidade garantidas</span>
-              </div>
-              <div className="flex items-center text-gray-700">
-                <div className="w-2 h-2 bg-indigo-500 rounded-full mr-3"></div>
-                <span>Gestão rápida e prática do seu fluxo de atendimento</span>
-              </div>
             </div>
           </div>
           
@@ -132,7 +120,7 @@ export default function LoginPage() {
               <div className="w-16 h-16 bg-gradient-to-r from-purple-600 to-violet-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <CheckCircle2 className="w-8 h-8 text-white" />
               </div>
-              <h1 className="text-2xl font-bold text-gray-900">MeuApp</h1>
+              <h1 className="text-2xl font-bold text-gray-900">Hubeleza</h1>
             </div>
 
             {/* Card container */}

@@ -31,6 +31,12 @@ export const getOperatorById = async (operator_id: string) => {
   return operator
 };
 
+export const getOperator = async () => {
+  const operator = await apiClient.get<Operator>(`${BASE_PATH}/me`);
+
+  return operator
+}
+
 export const createOperatorAction = async (props: CreateOperatorProps) => {
   await apiClient.post<void>(BASE_PATH, {
     name: props.name,

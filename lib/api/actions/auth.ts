@@ -9,7 +9,7 @@ import type { Account } from '@/types/entities/account';
 import { getAdmin } from './admin';
 import { getPartner } from './partner';
 import { revalidateTag } from 'next/cache';
-import { getOperatorById } from './operator';
+import { getOperator, getOperatorById } from './operator';
 import { redirect } from 'next/navigation';
 
 interface AuthResponse {
@@ -169,9 +169,13 @@ export async function getMe(): Promise<Account> {
   const accountType = cookieStore.get('account-type')?.value as AccountType | undefined;
 
   if (accountType === AccountType.ADMIN) {
-    return getAdmin();
+    return await getAdmin();
   }
 
-  return getPartner();
+  if (accountType === AccountType.OPERATOR) {
+    return await getOperator();
+  }
+
+  return await getPartner();
 }
 
