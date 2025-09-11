@@ -15,7 +15,7 @@ function getSecretKey() {
   return new TextEncoder().encode(secret);
 }
 
-const PUBLIC_PATHS = ["/auth", "/sign-up"];
+const PUBLIC_PATHS = ["/auth", "/sign-up", "/define-password"];
 const ADMIN_PATHS = ["/dashboard", "/forms", "/invites", "/partners", "/treatments", "/operators"];
 const PARTNER_PREFIX = "/partner/";
 

@@ -20,7 +20,7 @@ export default function DefinePasswordPageContent() {
       if (success) {
         setTimeout(() => {
           router.push("/dashboard")
-        }, 1100)
+        }, 250)
       } else {
         setError(true)
       }
