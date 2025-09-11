@@ -90,12 +90,14 @@ const Sidebar = () => {
               active={pathname === "/invites"}
               onClick={() => push("/invites")}
             />
-            <SidebarItem 
-              icon={Users} 
-              label="Operadores" 
-              active={pathname === "/operators"}
-              onClick={() => push("/operators")}
-            />
+            {accountType === AccountType.ADMIN && (
+              <SidebarItem 
+                icon={Users} 
+                label="Operadores" 
+                active={pathname === "/operators"}
+                onClick={() => push("/operators")}
+              />
+            )}
           </>
         )}
 
