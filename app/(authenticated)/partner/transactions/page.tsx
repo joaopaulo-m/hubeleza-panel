@@ -1,10 +1,10 @@
 import { TransactionItem } from "./_components/transaction-item";
-import { getTransactionsAction } from "@/lib/api/actions/transaction";
+import { getPartnerTransactionsAction } from "@/lib/api/actions/transaction";
 
 export const dynamic = "force-dynamic";
 
 export default async function FormsPage() {
-  const transactions = await getTransactionsAction()
+  const transactions = await getPartnerTransactionsAction()
 
   return (
     <div className="space-y-6">

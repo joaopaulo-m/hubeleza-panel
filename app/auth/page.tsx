@@ -63,8 +63,10 @@ export default function LoginPage() {
     setTimeout(() => {
       setIsLoading(false)
 
-      if (account_type === AccountType.ADMIN || account_type === AccountType.OPERATOR) {
+      if (account_type === AccountType.ADMIN) {
         router.push("/dashboard")
+      } else if (account_type === AccountType.OPERATOR) {
+        router.push("/operator/home")
       } else if (account_type === AccountType.PARTNER) {
         router.push("/partner/home")
       } else {

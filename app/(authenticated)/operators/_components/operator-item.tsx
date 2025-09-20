@@ -21,10 +21,16 @@ export function OperatorItem(props: OperatorItemProps) {
           </div>
         </div>
       </td>
-      <td className="px-6 py-4 whitespace-nowrap">
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/8 text-primary">
+      <td className="px-6 py-4 line-clamp-1">
+        <span title={operator.email} className="inline-text truncate max-w-10 items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/8 text-primary">
           {operator.email}
         </span>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+        {operator.sign_up_comission_percentage}%
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+        {operator.topup_comission_percentage}%
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
         {operator.created_by}

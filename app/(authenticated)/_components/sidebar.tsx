@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Activity, ArrowUpDown, Building2, FileText, Home, LayoutDashboard, LogOut, UserPlus, Users, Users2Icon } from "lucide-react";
+import { Activity, ArrowUpDown, BarChart3, Building2, FileText, Home, LayoutDashboard, LogOut, UserPlus, Users, Users2Icon } from "lucide-react";
 import Image from "next/image";
 
 import { SidebarItem } from "./sidebar-item";
@@ -60,12 +60,21 @@ const Sidebar = () => {
         {/* Admin sidebar items */}
         {(accountType === AccountType.ADMIN || accountType === AccountType.OPERATOR) && (
           <>
-            <SidebarItem
-              icon={LayoutDashboard} 
-              label="Dashboard" 
-              active={pathname === "/dashboard"}
-              onClick={() => push("/dashboard")}
-            />
+            {accountType === AccountType.ADMIN ? (
+              <SidebarItem
+                icon={LayoutDashboard}
+                label="Dashboard"
+                active={pathname === "/dashboard"}
+                onClick={() => push("/dashboard")}
+              />
+            ) : (
+              <SidebarItem 
+                icon={Home} 
+                label="Início" 
+                active={pathname === "/operator/home"}
+                onClick={() => push("/operator/home")}
+              />
+            )}
             <SidebarItem 
               icon={FileText} 
               label="Formulários" 
@@ -91,12 +100,30 @@ const Sidebar = () => {
               onClick={() => push("/invites")}
             />
             {accountType === AccountType.ADMIN && (
-              <SidebarItem 
-                icon={Users} 
-                label="Operadores" 
-                active={pathname === "/operators"}
-                onClick={() => push("/operators")}
-              />
+              <>
+                <SidebarItem 
+                  icon={Users} 
+                  label="Operadores" 
+                  active={pathname === "/operators"}
+                  onClick={() => push("/operators")}
+                />
+                <SidebarItem 
+                  icon={BarChart3} 
+                  label="Transações" 
+                  active={pathname === "/transactions"}
+                  onClick={() => push("/transactions")}
+                />
+              </>
+            )}
+            {accountType === AccountType.OPERATOR && (
+              <>
+                <SidebarItem 
+                  icon={BarChart3} 
+                  label="Transações" 
+                  active={pathname === "/operator/transactions"}
+                  onClick={() => push("/operator/transactions")}
+                />
+              </>
             )}
           </>
         )}

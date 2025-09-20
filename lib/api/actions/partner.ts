@@ -107,6 +107,12 @@ export const getPartner = async () => {
   return partner
 }
 
+export const getPartnerByIdAction = async (partner_id: string) => {
+  const partner = await apiClient.get<Partner>(`${BASE_PATH}/${partner_id}`)
+
+  return partner
+}
+
 export const getPartnerDetailsAction = async (id: string) => {
   const partner = await apiClient.get<Partner>(`${BASE_PATH}/${id}`, { tags: ["partner-details"] })
 

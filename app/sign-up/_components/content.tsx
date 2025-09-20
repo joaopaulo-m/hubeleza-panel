@@ -9,6 +9,7 @@ import { useForm } from "react-hook-form"
 import { z } from 'zod'
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Eye, EyeOff, Mail, Lock, User, Phone, MapPin, Loader2, IdCardIcon, Building2 } from "lucide-react"
+import ReactPlayer from 'react-player'
 
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
@@ -187,6 +188,16 @@ export function PartnerSignupPageContent() {
           />
           <h1 className="text-2xl font-bold text-gray-900">Torne-se nosso parceiro</h1>
           <p className="text-base text-gray-600">Junte-se à nossa rede e expanda seu negócio</p>
+        </div>
+
+        <div className="w-full relative flex justify-center items-center rounded-xl overflow-hidden mb-12 mt-5">
+          <ReactPlayer 
+            style={{
+              width: '100%',
+              height: 400,
+            }}
+            src='https://www.youtube.com/watch?v=LXb3EKWsInQ' 
+          />
         </div>
 
         {/* Card container */}

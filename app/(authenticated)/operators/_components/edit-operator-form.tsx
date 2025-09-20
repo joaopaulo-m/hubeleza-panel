@@ -20,7 +20,9 @@ interface EditOperatorProps {
 
 const formSchema = z.object({
   name: z.string().min(2, "Campo obrigatório"),
-  email: z.email('E-mail inválido')
+  email: z.email('E-mail inválido'),
+  sign_up_comission_percentage: z.string(),
+  topup_comission_percentage: z.string()
 })
 
 export const EditOperatorForm = (props: EditOperatorProps) => {
@@ -30,7 +32,9 @@ export const EditOperatorForm = (props: EditOperatorProps) => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: props.operator.name,
-      email: props.operator.email
+      email: props.operator.email,
+      sign_up_comission_percentage: props.operator.sign_up_comission_percentage ? String(props.operator.sign_up_comission_percentage) : "",
+      topup_comission_percentage: props.operator.topup_comission_percentage ? String(props.operator.topup_comission_percentage) : ""
     }
   })
 
@@ -39,7 +43,9 @@ export const EditOperatorForm = (props: EditOperatorProps) => {
       await updateOperatorAction({
         operator_id: props.operator.id,
         name: data.name,
-        email: data.email
+        email: data.email,
+        sign_up_comission_percentage: data.sign_up_comission_percentage ? Number(data.sign_up_comission_percentage) : undefined,
+        topup_comission_percentage: data.topup_comission_percentage ? Number(data.topup_comission_percentage) : undefined
       })
 
       toast.success("Operador editado com sucesso")
@@ -92,6 +98,38 @@ export const EditOperatorForm = (props: EditOperatorProps) => {
                   </FormItem>
                 )}
               />
+              <div className="w-full h-fit flex items-center gap-5">
+                  <FormField 
+                    control={form.control}
+                    name="sign_up_comission_percentage"
+                    render={({ field }) => (
+                      <FormItem className="w-full ">
+                        <FormLabel>Comissão cadastro:</FormLabel>
+                        <FormControl>
+                          <div className="w-full relative flex items-center">
+                            <Input type="number" {...field} />
+                            <span className="absolute right-3 text-sm p-1 rounded-lg bg-white">%</span>
+                          </div>
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField 
+                    control={form.control}
+                    name="topup_comission_percentage"
+                    render={({ field }) => (
+                      <FormItem className="w-full">
+                        <FormLabel>Comissão recarga:</FormLabel>
+                        <FormControl>
+                          <div className="w-full relative flex items-center">
+                            <Input type="number" {...field} />
+                            <span className="absolute right-3 text-sm p-1 rounded-lg bg-white">%</span>
+                          </div>
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
             </div>
             <DialogFooter className="mt-5">
               <DialogClose asChild>

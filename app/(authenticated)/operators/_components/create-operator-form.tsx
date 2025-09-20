@@ -9,13 +9,17 @@ import { Plus } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { createOperatorAction } from "@/lib/api/actions/operator"
+import { MaskedInput } from "@/components/ui/masked-input"
 
 const formSchema = z.object({
   name: z.string().min(2, "Campo obrigatório"),
   email: z.email("E-mail inválido"),
+  document: z.string().min(2, "Campo obrigatório"),
+  sign_up_comission_percentage: z.string(),
+  topup_comission_percentage: z.string()
 })
 
 export const CreateOperatorForm = () => {
@@ -25,7 +29,10 @@ export const CreateOperatorForm = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      email: ""
+      email: "",
+      document: "",
+      sign_up_comission_percentage: "",
+      topup_comission_percentage: ""
     }
   })
 
@@ -33,7 +40,10 @@ export const CreateOperatorForm = () => {
     try {
       await createOperatorAction({
         name: data.name,
-        email: data.email
+        email: data.email,
+        document: data.document,
+        sign_up_comission_percentage: Number(data.sign_up_comission_percentage),
+        topup_comission_percentage: Number(data.topup_comission_percentage)
       })
 
       toast.success("Operador criado com sucesso")
@@ -86,6 +96,60 @@ export const CreateOperatorForm = () => {
                   </FormItem>
                 )}
               />
+              <FormField
+                  control={form.control}
+                  name="document"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-semibold text-gray-700">
+                        CPF
+                      </FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <MaskedInput
+                            mask="999.999.999-99"
+                            placeholder="000.000.000-00"
+                            value={field.value}
+                            onChange={field.onChange}
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage className="text-sm mt-1" />
+                    </FormItem>
+                  )}
+                />
+                <div className="w-full h-fit flex items-center gap-5">
+                  <FormField 
+                    control={form.control}
+                    name="sign_up_comission_percentage"
+                    render={({ field }) => (
+                      <FormItem className="w-full ">
+                        <FormLabel>Comissão cadastro:</FormLabel>
+                        <FormControl>
+                          <div className="w-full relative flex items-center">
+                            <Input type="number" {...field} />
+                            <span className="absolute right-3 text-sm p-1 rounded-lg bg-white">%</span>
+                          </div>
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField 
+                    control={form.control}
+                    name="topup_comission_percentage"
+                    render={({ field }) => (
+                      <FormItem className="w-full">
+                        <FormLabel>Comissão recarga:</FormLabel>
+                        <FormControl>
+                          <div className="w-full relative flex items-center">
+                            <Input type="number" {...field} />
+                            <span className="absolute right-3 text-sm p-1 rounded-lg bg-white">%</span>
+                          </div>
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
             </div>
             <DialogFooter className="mt-5">
               <DialogClose asChild>
