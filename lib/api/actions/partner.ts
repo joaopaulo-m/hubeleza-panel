@@ -21,7 +21,8 @@ interface CreatePartnerProps {
 }
 
 interface SignPartnerUpProps {
-  invite_token: string
+  invite_token?: string
+  referral_code?: string
   name: string
   company_name: string
   cpf: string
@@ -137,7 +138,15 @@ export const createPartnerAction = async (props: CreatePartnerProps) => {
 }
 
 export const signPartnerUpAction = async (props: SignPartnerUpProps) => {
-  const response = await apiClient.post<SignPartnerUpReturn>(`${BASE_PATH}/invite-tokens/${props.invite_token}`, {
+  const query = new URLSearchParams();
+
+  if (props.invite_token) query.append("token", props.invite_token);
+  if (props.referral_code) query.append("code", props.referral_code);
+
+  const queryString = query.toString();
+  const url = `${BASE_PATH}/sign-up${queryString ? `?${queryString}` : ""}`;
+
+  const response = await apiClient.post<SignPartnerUpReturn>(url, {
     name: props.name,
     company_name: props.company_name,
     cpf: props.cpf,

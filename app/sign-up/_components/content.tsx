@@ -65,6 +65,7 @@ export function PartnerSignupPageContent() {
   const router = useRouter()
   
   const token = searchParams.get("token");
+  const code = searchParams.get("code");
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
@@ -99,6 +100,7 @@ export function PartnerSignupPageContent() {
     try {
       const payload = {
         invite_token: token || "",
+        referral_code: code || "",
         name: data.name,
         company_name: data.company_name,
         cpf: unmask(data.cpf),

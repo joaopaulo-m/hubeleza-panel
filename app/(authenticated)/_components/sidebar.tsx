@@ -171,6 +171,12 @@ const Sidebar = () => {
               active={pathname === "/affiliate/partners"}
               onClick={() => push("/affiliate/partners")}
             />
+            <SidebarItem 
+              icon={ArrowUpDown} 
+              label="Transações" 
+              active={pathname === "/affiliate/transactions"}
+              onClick={() => push("/affiliate/transactions")}
+            />
           </>
         )}
       </nav>
