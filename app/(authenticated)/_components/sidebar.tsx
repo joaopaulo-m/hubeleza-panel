@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Activity, ArrowUpDown, BarChart3, Building2, FileText, Home, LayoutDashboard, LogOut, UserPlus, Users, Users2Icon } from "lucide-react";
+import { Activity, ArrowUpDown, BarChart3, Building2, FileText, Handshake, Home, LayoutDashboard, LogOut, UserPlus, Users, Users2Icon } from "lucide-react";
 import Image from "next/image";
 
 import { SidebarItem } from "./sidebar-item";
@@ -106,6 +106,12 @@ const Sidebar = () => {
                   label="Operadores" 
                   active={pathname === "/operators"}
                   onClick={() => push("/operators")}
+                />
+                <SidebarItem 
+                  icon={Handshake} 
+                  label="Afiliados" 
+                  active={pathname === "/affiliates"}
+                  onClick={() => push("/affiliates")}
                 />
                 <SidebarItem 
                   icon={BarChart3} 
