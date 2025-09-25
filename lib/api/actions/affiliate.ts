@@ -33,6 +33,12 @@ export const getAffiliateById = async (affiliate_id: string) => {
   return affiliate
 };
 
+export const getAffiliate = async () => {
+  const affiliate = await apiClient.get<Affiliate>(`${BASE_PATH}/me`);
+
+  return affiliate
+};
+
 export const getAffiliatesAction = async (props: GetAffiliatesProps) => {
   const query = new URLSearchParams();
 

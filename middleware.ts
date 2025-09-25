@@ -18,6 +18,8 @@ function getSecretKey() {
 const PUBLIC_PATHS = ["/auth", "/sign-up", "/define-password"];
 const ADMIN_PATHS = ["/dashboard", "/forms", "/invites", "/partners", "/treatments", "/operators"];
 const PARTNER_PREFIX = "/partner/";
+const OPERATOR_PREFIX = "/operator/";
+const AFFILIATE_PREFIX = "/affiliate/";
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
@@ -64,6 +66,14 @@ export async function middleware(req: NextRequest) {
   }
 
   if (pathname.startsWith(PARTNER_PREFIX) && payload.account_type !== AccountType.PARTNER) {
+    return NextResponse.redirect(new URL("/auth", req.url));
+  }
+  
+  if (pathname.startsWith(OPERATOR_PREFIX) && payload.account_type !== AccountType.OPERATOR) {
+    return NextResponse.redirect(new URL("/auth", req.url));
+  }
+
+  if (pathname.startsWith(AFFILIATE_PREFIX) && payload.account_type !== AccountType.AFFILIATE) {
     return NextResponse.redirect(new URL("/auth", req.url));
   }
 

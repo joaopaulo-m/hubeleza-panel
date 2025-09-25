@@ -1,5 +1,6 @@
 export enum AccountType {
   PARTNER = "partner",
   ADMIN = "admin",
-  OPERATOR = "operator"
+  OPERATOR = "operator",
+  AFFILIATE = "affiliate"
 }

@@ -11,6 +11,7 @@ import { getPartner } from './partner';
 import { revalidateTag } from 'next/cache';
 import { getOperator, getOperatorById } from './operator';
 import { redirect } from 'next/navigation';
+import { getAffiliate } from './affiliate';
 
 interface AuthResponse {
   success: boolean;
@@ -174,6 +175,10 @@ export async function getMe(): Promise<Account> {
 
   if (accountType === AccountType.OPERATOR) {
     return await getOperator();
+  }
+
+  if (accountType === AccountType.AFFILIATE) {
+    return await getAffiliate()
   }
 
   return await getPartner();

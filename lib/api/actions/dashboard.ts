@@ -25,6 +25,12 @@ export interface OperatorDashboardData {
   total_partners: number
 }
 
+export interface AffiliateDashboardData {
+  total_comission_amount: number
+  total_withdraw_amount: number
+  total_partners: number
+}
+
 interface TransactionsDashboardData {
   total_transactions: number
   total_amount: number
@@ -68,6 +74,15 @@ export const getPartnerDashboardDataAction = async () => {
 export const getOperatorDashboardDataAction = async () => {
   const dashboard = await apiClient.get<OperatorDashboardData>(`${BASE_PATH}/operators`, { 
     tags: ["operator-dashboard"],
+    revalidate: 8
+  })
+
+  return dashboard
+}
+
+export const getAffiliateDashboardDataAction = async () => {
+  const dashboard = await apiClient.get<AffiliateDashboardData>(`${BASE_PATH}/affiliates`, { 
+    tags: ["affiliate-dashboard"],
     revalidate: 8
   })
 

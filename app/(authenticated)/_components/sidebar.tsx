@@ -156,6 +156,15 @@ const Sidebar = () => {
             />
           </>
         )}
+
+        {accountType === AccountType.AFFILIATE && (
+          <SidebarItem 
+            icon={Home} 
+            label="Início" 
+            active={pathname === "/affiliate/home"}
+            onClick={() => push("/affiliate/home")}
+          />
+        )}
       </nav>
       <div className="absolute bottom-6 w-full px-6 flex justify-between items-center">
         <Avatar>

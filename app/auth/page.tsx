@@ -69,6 +69,8 @@ export default function LoginPage() {
         router.push("/operator/home")
       } else if (account_type === AccountType.PARTNER) {
         router.push("/partner/home")
+      } else if (account_type === AccountType.AFFILIATE) {
+        router.push("/affiliate/home")
       } else {
         toast.error("Não foi possível encontrar o tipo da conta.")
       }
