@@ -22,7 +22,7 @@ export const AffiliateFastActionsCard = () => {
           </div>
         </button>
 
-        <Link href="/operator/partners" className="w-full flex p-3 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors text-left group cursor-pointer">
+        <Link href="/affiliate/partners" className="w-full flex p-3 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors text-left group cursor-pointer">
           <div className="flex items-center gap-3">
             <div className="h-8 w-8 rounded-lg bg-blue-100 flex items-center justify-center group-hover:scale-105 transition-transform">
               <Users2 className="h-4 w-4 text-blue-600" />

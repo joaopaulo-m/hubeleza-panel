@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Activity, ArrowUpDown, BarChart3, Building2, FileText, Handshake, Home, LayoutDashboard, LogOut, UserPlus, Users, Users2Icon } from "lucide-react";
+import { Activity, ArrowUpDown, BarChart3, Building2, FileText, Handshake, Home, LayoutDashboard, LogOut, UserPlus, Users, Users2, Users2Icon } from "lucide-react";
 import Image from "next/image";
 
 import { SidebarItem } from "./sidebar-item";
@@ -158,12 +158,20 @@ const Sidebar = () => {
         )}
 
         {accountType === AccountType.AFFILIATE && (
-          <SidebarItem 
-            icon={Home} 
-            label="Início" 
-            active={pathname === "/affiliate/home"}
-            onClick={() => push("/affiliate/home")}
-          />
+          <>
+            <SidebarItem 
+              icon={Home} 
+              label="Início" 
+              active={pathname === "/affiliate/home"}
+              onClick={() => push("/affiliate/home")}
+            />
+            <SidebarItem 
+              icon={Users2} 
+              label="Parceiros" 
+              active={pathname === "/affiliate/partners"}
+              onClick={() => push("/affiliate/partners")}
+            />
+          </>
         )}
       </nav>
       <div className="absolute bottom-6 w-full px-6 flex justify-between items-center">
