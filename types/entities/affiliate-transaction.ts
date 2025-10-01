@@ -6,4 +6,7 @@ export interface AffiliateTransaction {
   created_at: number
   comission_percentage?: number
   partner_id?: string
+  lead_id?: string
+  lead_price?: number
+  lead_comission_amount?: number
 }

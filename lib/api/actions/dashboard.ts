@@ -27,7 +27,7 @@ export interface OperatorDashboardData {
 
 export interface AffiliateDashboardData {
   total_comission_amount: number
-  total_withdraw_amount: number
+  total_leads: number
   total_partners: number
 }
 

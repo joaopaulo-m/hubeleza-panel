@@ -5,6 +5,7 @@ export interface Affiliate {
   password: string
   created_at: number
   comission_percentage: number
+  lead_comission_amount?: number
   referral_code: string
   password_not_defined?: boolean
 }

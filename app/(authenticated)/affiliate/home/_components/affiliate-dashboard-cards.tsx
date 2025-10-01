@@ -37,18 +37,18 @@ export const AffiliateDashboardCards: React.FC<AffiliateDashboardCardsProps> = (
         <CardHeader className="relative">
           <div className="flex items-center justify-between">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Retirado
+              Total de Leads
             </CardTitle>
           </div>
         </CardHeader>
         <CardContent className="relative pt-0">
           <div className="space-y-2">
             <div className="text-3xl font-bold tracking-tight">
-              {formatCurrency(data.total_withdraw_amount)}
+              {data.total_leads}
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <TrendingUp className="h-3 w-3" />
-              <span>Total retirado da carteira hubeleza</span>
+              <span>Total de leads enviados por você</span>
             </div>
           </div>
         </CardContent>

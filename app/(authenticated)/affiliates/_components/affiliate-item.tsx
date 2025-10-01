@@ -3,6 +3,7 @@ import { User2 } from "lucide-react";
 import type { Affiliate } from "@/types/entities/affiliate";
 import { EditAffiliateForm } from "./edit-affiliate-form";
 import { DeleteAffiliateForm } from "./delete-affiliate-form";
+import { formatCurrency } from "@/lib/utils";
 
 interface AffiliateItemProps {
   affiliate: Affiliate
@@ -31,6 +32,9 @@ export function AffiliateItem(props: AffiliateItemProps) {
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
         {affiliate.comission_percentage}%
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+        {affiliate.lead_comission_amount ? formatCurrency(affiliate.lead_comission_amount) : "*"}
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
         <div className="flex items-center justify-end space-x-2">

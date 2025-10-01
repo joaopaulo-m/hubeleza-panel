@@ -13,13 +13,15 @@ import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/
 import { Input } from "@/components/ui/input"
 import { MaskedInput } from "@/components/ui/masked-input"
 import { createAffiliateAction } from "@/lib/api/actions/affiliate"
+import { CurrencyInput } from "@/components/ui/currency-input"
 
 const formSchema = z.object({
   name: z.string().min(2, "Campo obrigatório"),
   email: z.email("E-mail incorreto"),
   document: z.string().min(2, "Campo obrigatório"),
   referral_code: z.string().min(2, "Campo obrigatório"),
-  comission_percentage: z.string()
+  comission_percentage: z.string(),
+  lead_comission_amount: z.number(),
 })
 
 export const CreateAffiliateForm = () => {
@@ -32,7 +34,8 @@ export const CreateAffiliateForm = () => {
       email: "",
       document: "",
       referral_code: "",
-      comission_percentage: ""
+      comission_percentage: "",
+      lead_comission_amount: 0
     }
   })
 
@@ -43,7 +46,8 @@ export const CreateAffiliateForm = () => {
         email: data.email,
         document: data.document,
         referral_code: data.referral_code,
-        comission_percentage: Number(data.comission_percentage)
+        comission_percentage: Number(data.comission_percentage),
+        lead_comission_amount: data.lead_comission_amount
       })
 
       toast.success("Afiliado criado com sucesso")
@@ -121,21 +125,35 @@ export const CreateAffiliateForm = () => {
                   </FormItem>
                 )}
               />
-              <FormField 
-                control={form.control}
-                name="comission_percentage"
-                render={({ field }) => (
-                  <FormItem className="w-full">
-                    <FormLabel>Comissão do afiliado:</FormLabel>
-                    <FormControl>
-                      <div className="w-full relative flex items-center">
-                        <Input type="number" {...field} />
-                        <span className="absolute right-3 text-sm p-1 rounded-lg bg-white">%</span>
-                      </div>
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
+              <div className="w-full h-fit flex items-center gap-6">
+                <FormField 
+                  control={form.control}
+                  name="lead_comission_amount"
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <FormLabel>Comissão por Lead:</FormLabel>
+                      <FormControl>
+                        <CurrencyInput {...field} /> 
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField 
+                  control={form.control}
+                  name="comission_percentage"
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <FormLabel>Comissão cadastro:</FormLabel>
+                      <FormControl>
+                        <div className="w-full relative flex items-center">
+                          <Input type="number" {...field} />
+                          <span className="absolute right-3 text-sm p-1 rounded-lg bg-white">%</span>
+                        </div>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
             <DialogFooter className="mt-5">
               <DialogClose asChild>

@@ -7,6 +7,9 @@ import { formatCurrency, formatDate } from "@/lib/utils";
 import type { Partner } from "@/types/entities/partner";
 import { getPartnerByIdAction } from "@/lib/api/actions/partner";
 import type { AffiliateTransaction } from "@/types/entities/affiliate-transaction";
+import type { Lead } from "@/types/entities/lead";
+import { getLeadByIdAction } from "@/lib/api/actions/lead";
+import { TransactionType } from "@/types/enums/transaction-type";
 
 interface AffiliateTransactionItemProps {
   transaction: AffiliateTransaction
@@ -17,6 +20,8 @@ export function AffiliateTransactionItem(props: AffiliateTransactionItemProps) {
   const [open, setOpen] = useState(false)
   const [partner, setPartner] = useState<Partner | null>(null)
   const [loadingPartner, setLoadingPartner] = useState(false)
+  const [lead, setLead] = useState<Lead | null>(null)
+  const [loadingLead, setLoadingLead] = useState(false)
 
   useEffect(() => {
     async function getPartner() {
@@ -29,8 +34,20 @@ export function AffiliateTransactionItem(props: AffiliateTransactionItemProps) {
         setLoadingPartner(false)
       }
     }
+  
+    async function getLead() {
+      if (props.transaction.lead_id) {
+        setLoadingLead(true)
+        
+        const lead = await getLeadByIdAction(props.transaction.lead_id)
+
+        setLead(lead)
+        setLoadingLead(false)
+      }
+    }
     
     getPartner()
+    getLead()
   }, [props])
 
   return (
@@ -62,6 +79,16 @@ export function AffiliateTransactionItem(props: AffiliateTransactionItemProps) {
           {(loadingPartner && !partner) && (<span>Carregando...</span>)}
           {(!loadingPartner && !partner) && (<span>*</span>)}
           {partner && (<span>{partner.name}</span>)}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+          {(loadingLead && !lead) && (<span>Carregando...</span>)}
+          {(!loadingLead && !lead) && (<span>*</span>)}
+          {lead && (<span>{lead.name}</span>)}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+          {transaction.type === TransactionType.EXPENSE && "*"}
+          {partner && `${transaction.comission_percentage || 0}%`}
+          {lead && `${formatCurrency(transaction.lead_comission_amount || 0)}`}
         </td>
         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
           {formatDate(transaction.created_at)}

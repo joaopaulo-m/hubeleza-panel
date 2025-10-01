@@ -10,7 +10,8 @@ interface CreateAffiliateProps {
   email: string
   document: string
   referral_code: string,
-  comission_percentage: number,
+  comission_percentage: number
+  lead_comission_amount: number
 }
 
 interface UpdateAffiliateProps {
@@ -60,7 +61,8 @@ export const createAffiliateAction = async (props: CreateAffiliateProps) => {
     email: props.email,
     document: props.document,
     comission_percentage: props.comission_percentage,
-    referral_code: props.referral_code
+    referral_code: props.referral_code,
+    lead_comission_amount: props.lead_comission_amount
   })
 
   revalidateTag('affiliates')

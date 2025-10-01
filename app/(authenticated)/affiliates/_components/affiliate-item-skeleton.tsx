@@ -20,6 +20,9 @@ export function AffiliateItemSkeleton() {
       <td className="px-6 py-4 whitespace-nowrap">
         <Skeleton className="h-4 w-4" />
       </td>
+      <td className="px-6 py-4 whitespace-nowrap">
+        <Skeleton className="h-4 w-4" />
+      </td>
       <td className="px-6 py-4 whitespace-nowrap text-right">
         <div className="flex items-center justify-end space-x-2">
           <Skeleton className="h-8 w-8 rounded" />

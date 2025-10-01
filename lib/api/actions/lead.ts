@@ -41,6 +41,12 @@ export const getCurrentPartnerLeadsAction = async (props: GetCurrentPartnerLeads
   };
 };
 
+export const getLeadByIdAction = async (lead_id: string) => {
+  const lead = await apiClient.get<Lead>(`${BASE_PATH}/${lead_id}/id`);
+
+  return lead
+}
+
 export const getPartnerLeadsAction = async (id: string) => {
   const { data } = await apiClient.get<{ data: Lead[], total: number, total_pages: number }>(`${BASE_PATH}/partner/${id}`, {
     tags: ["partner-details-lead"],
