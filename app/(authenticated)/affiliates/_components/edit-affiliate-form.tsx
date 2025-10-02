@@ -13,6 +13,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input"
 import type { Affiliate } from "@/types/entities/affiliate"
 import { updateAffiliateAction } from "@/lib/api/actions/affiliate"
+import { CurrencyInput } from "@/components/ui/currency-input"
 
 interface EditAffiliateFormProps {
   affiliate: Affiliate
@@ -21,7 +22,8 @@ interface EditAffiliateFormProps {
 const formSchema = z.object({
   name: z.string().min(2, "Campo obrigatório"),
   referral_code: z.string().min(2, "Campo obrigatório"),
-  comission_percentage: z.string().min(1, "Campo obrigatório")
+  comission_percentage: z.string().min(1, "Campo obrigatório"),
+  lead_comission_amount: z.number()
 })
 
 export const EditAffiliateForm = (props: EditAffiliateFormProps) => {
@@ -32,7 +34,8 @@ export const EditAffiliateForm = (props: EditAffiliateFormProps) => {
     defaultValues: {
       name: props.affiliate.name,
       referral_code: props.affiliate.referral_code,
-      comission_percentage: props.affiliate.comission_percentage.toString()
+      comission_percentage: props.affiliate.comission_percentage.toString(),
+      lead_comission_amount: props.affiliate.lead_comission_amount || 0
     }
   })
 
@@ -42,7 +45,8 @@ export const EditAffiliateForm = (props: EditAffiliateFormProps) => {
         affiliate_id: props.affiliate.id,
         name: data.name,
         referral_code: data.referral_code,
-        comission_percentage: Number(data.comission_percentage)
+        comission_percentage: Number(data.comission_percentage),
+        lead_comission_amount: data.lead_comission_amount
       })
 
       toast.success("Afiliado editado com sucesso")
@@ -93,21 +97,35 @@ export const EditAffiliateForm = (props: EditAffiliateFormProps) => {
                   </FormItem>
                 )}
               />
-              <FormField 
-                control={form.control}
-                name="comission_percentage"
-                render={({ field }) => (
-                  <FormItem className="w-full">
-                    <FormLabel>Comissão do afiliado:</FormLabel>
-                    <FormControl>
-                      <div className="w-full relative flex items-center">
-                        <Input type="number" {...field} />
-                        <span className="absolute right-3 text-sm p-1 rounded-lg bg-white">%</span>
-                      </div>
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
+              <div className="w-full h-fit flex items-center gap-6">
+                <FormField 
+                  control={form.control}
+                  name="lead_comission_amount"
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <FormLabel>Comissão por Lead:</FormLabel>
+                      <FormControl>
+                        <CurrencyInput {...field} /> 
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField 
+                  control={form.control}
+                  name="comission_percentage"
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <FormLabel>Comissão cadastro:</FormLabel>
+                      <FormControl>
+                        <div className="w-full relative flex items-center">
+                          <Input type="number" {...field} />
+                          <span className="absolute right-3 text-sm p-1 rounded-lg bg-white">%</span>
+                        </div>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
             <DialogFooter className="mt-5">
               <DialogClose asChild>

@@ -19,6 +19,7 @@ interface UpdateAffiliateProps {
   name: string
   referral_code: string
   comission_percentage: number
+  lead_comission_amount: number
 }
 
 interface GetAffiliatesProps {
@@ -72,7 +73,8 @@ export const updateAffiliateAction = async (props: UpdateAffiliateProps) => {
   await apiClient.patch<void>(`${BASE_PATH}/${props.affiliate_id}`, {
     name: props.name,
     referral_code: props.referral_code,
-    comission_percentage: props.comission_percentage
+    comission_percentage: props.comission_percentage,
+    lead_comission_amount: props.lead_comission_amount
   })
 
   revalidateTag('affiliates')

@@ -11,7 +11,7 @@ import { getPartner } from './partner';
 import { revalidateTag } from 'next/cache';
 import { getOperator, getOperatorById } from './operator';
 import { redirect } from 'next/navigation';
-import { getAffiliate } from './affiliate';
+import { getAffiliate, getAffiliateById } from './affiliate';
 
 interface AuthResponse {
   success: boolean;
@@ -130,16 +130,32 @@ export async function definePasswordAction(password: string) {
   }
 }
 
-export async function sendToDefinePasswordAction(operator_id: string) {
+export async function sendToDefinePasswordAction(account_id: string) {
   try {
-    const operator = await getOperatorById(operator_id)
+    let accountEmail = ""
+    let accountType = AccountType.OPERATOR
+
+    try {
+      const operator = await getOperatorById(account_id)
+
+      accountEmail = operator.email
+    } catch {}
+
+    try {
+      const affiliate = await getAffiliateById(account_id)
+
+      accountEmail = affiliate.email
+      accountType = AccountType.AFFILIATE
+    } catch {}
+
     await authenticateWithEmailAndPassword({
-      email: operator.email,
+      email: accountEmail,
       password: "00000000"
     })
 
     return {
-      success: true
+      success: true,
+      accountType
     }
   } catch(error) {
     console.error("Error sending to define password page: ", error)
