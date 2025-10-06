@@ -4,32 +4,26 @@ export const dynamic = 'force-dynamic';
 
 import { useEffect, useState } from "react"
 import Image from "next/image"
-import { useRouter, useSearchParams } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { z } from 'zod'
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Eye, EyeOff, Mail, Lock, User, Phone, MapPin, Loader2, IdCardIcon, Building2 } from "lucide-react"
+import { Eye, EyeOff, Mail, Lock, User, Phone, Loader2, IdCardIcon, Instagram, Tag } from "lucide-react"
 import ReactPlayer from 'react-player'
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 import { MaskedInput } from "@/components/ui/masked-input"
-import { TreatmentSelector } from "../../(authenticated)/_components/treatment-selector"
-import { signPartnerUpAction, type SignPartnerUpReturn } from "@/lib/api/actions/partner"
-import { toast } from "sonner"
-import axios from "axios"
-import { getInviteTokenByTokenAction } from "@/lib/api/actions/invite-token"
-import { AccountPaymentDialog } from "./account-payment-dialog"
-import { authenticateWithEmailAndPassword } from "@/lib/api/actions/auth";
+import { checkReferralCodeAvailabilityAction, signAffiliateUpAction } from "@/lib/api/actions/affiliate";
+import { generateAffiliateCodeFromName } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 const signupSchema = z
   .object({
-    company_name: z.string().min(1, "O nome da empresa é obrigatório"),
     name: z.string().min(1, "Nome é obrigatório"),
     cpf: z.string(),
-    cnpj: z.string().optional(),
     email: z
       .string()
       .min(1, "E-mail é obrigatório")
@@ -41,11 +35,9 @@ const signupSchema = z
     confirm_password: z
       .string()
       .min(1, "Confirmação de senha é obrigatória"),
-    cep: z.string().min(1, "CEP é obrigatório"),
-    city: z.string(),
-    state: z.string(),
     phone_number: z.string().min(1, "Telefone é obrigatório"),
-    treatment_ids: z.array(z.string()).min(1, "Selecione pelo menos um tratamento"),
+    referral_code: z.string().min(4, "Mínimo 4 caracteres").max(35, "Máximo 15 caracteres"),
+    ig_username: z.string().min(1, "Campo obrigatório")
   })
   .refine((data) => data.password === data.confirm_password, {
     message: "As senhas não coincidem",
@@ -54,33 +46,26 @@ const signupSchema = z
 
 type SignupFormValues = z.infer<typeof signupSchema>
 
-export function PartnerSignupPageContent() {
+export function AffiliateSignupPageContent() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [acceptTerms, setAcceptTerms] = useState(false)
-  const [cep, setCep] = useState('')
-  const [paymentData, setPaymentData] = useState<SignPartnerUpReturn | null>(null)
+  const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
+  const [isReferralAvailable, setIsReferralAvailable] = useState<boolean | null>(null);
 
-  const searchParams = useSearchParams();
   const router = useRouter()
-  
-  const token = searchParams.get("token");
-  const code = searchParams.get("code");
+
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
-      company_name: "",
       name: "",
       cpf: "",
-      cnpj: "",
       email: "",
       password: "",
       confirm_password: "",
-      cep: "",
-      city: "",
-      state: "",
+      referral_code: "",
       phone_number: "",
-      treatment_ids: []
+      ig_username: ""
     },
     mode: "onBlur"
   })
@@ -91,37 +76,37 @@ export function PartnerSignupPageContent() {
 
   async function onSubmit(data: SignupFormValues) {
     if (!acceptTerms) {
-      alert("Você deve aceitar os termos de uso para continuar")
+      toast.error("Você deve aceitar os termos de uso para continuar")
       return
+    }
+
+    if (!isReferralAvailable) {
+      toast.error("Código de afiliado não disponível!")
+      return;
     }
 
     setIsLoading(true)
     
     try {
       const payload = {
-        invite_token: token || "",
-        referral_code: code || "",
         name: data.name,
-        company_name: data.company_name,
-        cpf: unmask(data.cpf),
-        cnpj: data.cnpj ? unmask(data.cnpj) : undefined,
+        document: unmask(data.cpf),
         email: data.email,
         password: data.password,
-        cep: unmask(data.cep),
-        city: data.city,
-        state: data.state,
         phone_number: unmask(data.phone_number),
-        treatment_ids: data.treatment_ids
+        referral_code: data.referral_code,
+        ig_username: data.ig_username
       }
 
-      toast.success(`Primeira etapa concluída!`)
-      const paymentData = await signPartnerUpAction(payload)
-      setPaymentData(paymentData)
+      const { success } = await signAffiliateUpAction(payload)
+      
+      if (success) {
+        toast.success('Conta criado com sucesso')
+        router.push("/affiliate/home")
+      }
     } catch (error) {
-      console.error("Erro no cadastro:", error)
-      toast.error("Erro ao criar parceiro", {
-        description: "Convite expirado"
-      })
+      console.error("Erro no cadastro de afiliado: ", error)
+      toast.error("Erro inesperado, tente novamente mais tarde.")
     } finally {
       setIsLoading(false)
     }
@@ -131,49 +116,42 @@ export function PartnerSignupPageContent() {
     setShowPassword(!showPassword)
   }
 
-  async function setCityAndState(cep: string) {
-    try {
-      const { data: { localidade, uf } } = await axios.get(`https://viacep.com.br/ws/${cep}/json/`)
-      
-      form.setValue("city", localidade)
-      form.setValue("state", uf)
-    } catch (err) {
-      toast.error("Erro ao buscar cidade e estado pelo CEP.")
-      console.error(err)
+  useEffect(() => {
+    const code = form.watch("referral_code")?.trim();
+
+    if (!code || code.length < 4) {
+      setIsReferralAvailable(null);
+      return;
     }
-  }
 
-  async function onPaymentSuccess() {
-    await new Promise(async res => setTimeout(res, 1200))
-    await authenticateWithEmailAndPassword({
-      email: form.watch('email'),
-      password: form.watch('password')
-    })
-
-    router.push("/partner/home")
-  }
-
-  useEffect(() => {
-      if (cep.length === 9) {
-        setCityAndState(unmask(cep))
-      }
-    }, [form, cep])
-
-  useEffect(() => {
-    async function getInviteToken() {
+    setIsCheckingAvailability(true);
+    const timeout = setTimeout(async () => {
       try {
-        if (token) {
-          const inviteToken = await getInviteTokenByTokenAction(token)
-
-          form.setValue('phone_number', inviteToken.phone_number)
-        }
-      } catch(error) {
-        console.error("Error getting invite token", error)
+        const res = await fetch(`/api/check-referral?code=${code}`);
+        const data = await res.json();
+        setIsReferralAvailable(data.available);
+      } catch (err) {
+        console.error("Erro ao verificar código:", err);
+        setIsReferralAvailable(null);
+      } finally {
+        setIsCheckingAvailability(false);
       }
+    }, 1000);
+
+    return () => clearTimeout(timeout);
+  }, [form.watch("referral_code")]);
+
+  useEffect(() => {
+    async function generateAffiliateCode() {
+      const affiliateCode = await generateAffiliateCodeFromName(form.watch('name'), checkReferralCodeAvailabilityAction)
+
+      form.setValue('referral_code', affiliateCode)
     }
 
-    getInviteToken()
-  }, [token, form])
+    if (form.watch('name').length > 0) {
+      generateAffiliateCode()
+    }
+  }, [form.watch("name")])
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12">
@@ -188,8 +166,8 @@ export function PartnerSignupPageContent() {
             width={150}
             height={75}
           />
-          <h1 className="text-2xl font-bold text-gray-900">Torne-se nosso parceiro</h1>
-          <p className="text-base text-gray-600">Junte-se à nossa rede e expanda seu negócio</p>
+          <h1 className="text-2xl font-bold text-gray-900">Torne-se nosso afiliado</h1>
+          <p className="text-base text-gray-600">Faça parte do nosso programa de afiliados e aumente seus ganhos com parcerias estratégicas</p>
         </div>
 
         <div className="w-full relative flex justify-center items-center rounded-xl overflow-hidden mb-12 mt-5">
@@ -207,23 +185,128 @@ export function PartnerSignupPageContent() {
           {/* Form */}
           <Form {...form}>
             <div className="space-y-6">
-              
-              {/* Nome Field */}
               <FormField
                 control={form.control}
-                name="company_name"
+                name="name"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="w-full">
                     <FormLabel className="text-sm font-semibold text-gray-700">
-                      Nome da Empresa
+                      Nome do responsável
                     </FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <Building2 className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                        <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                         <Input
-                          placeholder="Ex: Clínica Beauty"
+                          placeholder="Ex: Seu nome"
                           className="pl-12 h-12"
                           {...field}
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage className="text-sm mt-1" />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="referral_code"
+                render={({ field }) => (
+                  <FormItem className="w-full">
+                    <FormLabel className="text-sm font-semibold text-gray-700">
+                      Seu código de afiliado
+                    </FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Tag className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                        <Input
+                          className="pl-12 h-12"
+                          {...field}
+                        />
+                      </div>
+                    </FormControl>
+                    {form.watch("referral_code")?.length >= 4 && (
+                      <div className="text-sm mt-1 ml-1">
+                        {isCheckingAvailability && (
+                          <span className="text-gray-500">Verificando disponibilidade...</span>
+                        )}
+                        {isReferralAvailable === true && !isCheckingAvailability && (
+                          <span className="text-green-600">Código disponível ✅</span>
+                        )}
+                        {isReferralAvailable === false && !isCheckingAvailability && (
+                          <span className="text-red-600">Código já em uso ❌</span>
+                        )}
+                      </div>
+                    )}
+                    <FormMessage className="text-sm mt-1" />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="cpf"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-semibold text-gray-700">
+                      CPF
+                    </FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <IdCardIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                        <MaskedInput
+                          mask="999.999.999-99"
+                          placeholder="000.000.000-00"
+                          className="pl-12 h-12"
+                          value={field.value}
+                          onChange={field.onChange}
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage className="text-sm mt-1" />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="phone_number"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-semibold text-gray-700">
+                      Telefone (WhatsApp)
+                    </FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Phone className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                        <MaskedInput
+                          mask="(99) 99999-9999"
+                          placeholder="(00) 00000-0000"
+                          className="pl-12 h-12"
+                          value={field.value}
+                          onChange={field.onChange}
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage className="text-sm mt-1" />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="ig_username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-semibold text-gray-700">
+                      Usuário do Instagram
+                    </FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Instagram className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                        <Input 
+                          {...field} 
+                          placeholder="@seuinstagram"
+                          className="pl-12 h-12"
                         />
                       </div>
                     </FormControl>
@@ -256,138 +339,6 @@ export function PartnerSignupPageContent() {
                   </FormItem>
                 )}
               />
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                {/* CEP Field */}
-                <FormField
-                  control={form.control}
-                  name="cep"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-semibold text-gray-700">
-                        CEP
-                      </FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                          <MaskedInput
-                            mask="99999-999"
-                            placeholder="00000-000"
-                            className="pl-12 h-12"
-                            value={field.value}
-                            onChange={(e) => {
-                              setCep(e)
-                              field.onChange(e)
-                            }}
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage className="text-sm mt-1" />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Telefone Field */}
-                <FormField
-                  control={form.control}
-                  name="phone_number"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-semibold text-gray-700">
-                        Telefone (WhatsApp)
-                      </FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Phone className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                          <MaskedInput
-                            mask="(99) 99999-9999"
-                            placeholder="(00) 00000-0000"
-                            className="pl-12 h-12"
-                            value={field.value}
-                            onChange={field.onChange}
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage className="text-sm mt-1" />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-semibold text-gray-700">
-                      Nome do responsável
-                    </FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                        <Input
-                          placeholder="Ex: Seu nome"
-                          className="pl-12 h-12"
-                          {...field}
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage className="text-sm mt-1" />
-                  </FormItem>
-                )}
-              />
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <FormField
-                  control={form.control}
-                  name="cpf"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-semibold text-gray-700">
-                        CPF
-                      </FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <IdCardIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                          <MaskedInput
-                            mask="999.999.999-99"
-                            placeholder="000.000.000-00"
-                            className="pl-12 h-12"
-                            value={field.value}
-                            onChange={field.onChange}
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage className="text-sm mt-1" />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="cnpj"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-semibold text-gray-700">
-                        CNPJ
-                      </FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Building2 className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                          <MaskedInput
-                            mask="99.999.999/9999-99"
-                            placeholder="00.000.000/0000-00"
-                            className="pl-12 h-12"
-                            value={field.value}
-                            onChange={field.onChange}
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage className="text-sm mt-1" />
-                    </FormItem>
-                  )}
-                />
-              </div>
 
               {/* Password Field */}
               <FormField
@@ -460,27 +411,6 @@ export function PartnerSignupPageContent() {
                 )}
               />
 
-              {/* Tratamentos Field */}
-              <FormField
-                control={form.control}
-                name="treatment_ids"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-semibold text-gray-700">
-                      Tratamentos oferecidos
-                    </FormLabel>
-                    <FormControl>
-                      <TreatmentSelector
-                        value={field.value}
-                        onChange={field.onChange}
-                        state={form.watch('state')}
-                      />
-                    </FormControl>
-                    <FormMessage className="text-sm mt-1" />
-                  </FormItem>
-                )}
-              />
-
               {/* Terms checkbox */}
               <div className="flex items-start space-x-3 pt-2">
                 <Checkbox
@@ -502,7 +432,7 @@ export function PartnerSignupPageContent() {
                   e{" "}
                   <button type="button" className="text-purple-600 hover:text-purple-700 font-medium underline">
                     Política de Privacidade
-                  </button>, e está ciente das condições e valores relacionados ao envio de leads para sua clínica, conforme descrito nos Termos.
+                  </button>, e está ciente das condições e valores relacionados ao envio de leads, conforme descrito nos Termos.
                 </label>
               </div>
 
@@ -519,7 +449,7 @@ export function PartnerSignupPageContent() {
                     Processando...
                   </>
                 ) : (
-                  "Avançar para próxima etapa"
+                  "Criar minha conta!"
                 )}
               </Button>
             </div>
@@ -533,12 +463,6 @@ export function PartnerSignupPageContent() {
           </p>
         </div>
       </div>
-      {paymentData && (
-        <AccountPaymentDialog 
-          {...paymentData}
-          onSuccess={onPaymentSuccess}
-        />
-      )}
     </div>
   )
 }

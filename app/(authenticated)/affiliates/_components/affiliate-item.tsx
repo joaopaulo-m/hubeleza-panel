@@ -4,9 +4,27 @@ import type { Affiliate } from "@/types/entities/affiliate";
 import { EditAffiliateForm } from "./edit-affiliate-form";
 import { DeleteAffiliateForm } from "./delete-affiliate-form";
 import { formatCurrency } from "@/lib/utils";
+import { AffiliateStatus } from "@/types/enums/affiliate-status";
+import { Badge } from "@/components/ui/badge";
 
 interface AffiliateItemProps {
   affiliate: Affiliate
+}
+
+const STATUS_CONFIG = {
+
+  [AffiliateStatus.CONFIRMATION_PENDING]: {
+    label: "Confirmação Pendente", 
+    color: "bg-blue-50 text-blue-700 border-blue-200"
+  },
+  [AffiliateStatus.ACTIVE]: {
+    label: "Ativo",
+    color: "bg-green-50 text-green-700 border-green-200"
+  },
+  [AffiliateStatus.CANCELED]: {
+    label: "Cancelado",
+    color: "bg-gray-50 text-gray-700 border-gray-200"
+  }
 }
 
 export function AffiliateItem(props: AffiliateItemProps) {
@@ -24,6 +42,11 @@ export function AffiliateItem(props: AffiliateItemProps) {
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
         {affiliate.email}
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap">
+        <Badge variant="outline" className={STATUS_CONFIG[affiliate.status].color}>
+          {STATUS_CONFIG[affiliate.status].label}
+        </Badge>
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/8 text-primary">

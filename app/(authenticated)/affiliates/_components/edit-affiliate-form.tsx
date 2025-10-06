@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input"
 import type { Affiliate } from "@/types/entities/affiliate"
 import { updateAffiliateAction } from "@/lib/api/actions/affiliate"
 import { CurrencyInput } from "@/components/ui/currency-input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 interface EditAffiliateFormProps {
   affiliate: Affiliate
@@ -21,6 +22,7 @@ interface EditAffiliateFormProps {
 
 const formSchema = z.object({
   name: z.string().min(2, "Campo obrigatório"),
+  status: z.string().min(2, "Campo obrigatório"),
   referral_code: z.string().min(2, "Campo obrigatório"),
   comission_percentage: z.string().min(1, "Campo obrigatório"),
   lead_comission_amount: z.number()
@@ -33,6 +35,7 @@ export const EditAffiliateForm = (props: EditAffiliateFormProps) => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: props.affiliate.name,
+      status: props.affiliate.status,
       referral_code: props.affiliate.referral_code,
       comission_percentage: props.affiliate.comission_percentage.toString(),
       lead_comission_amount: props.affiliate.lead_comission_amount || 0
@@ -44,6 +47,7 @@ export const EditAffiliateForm = (props: EditAffiliateFormProps) => {
       await updateAffiliateAction({
         affiliate_id: props.affiliate.id,
         name: data.name,
+        status: data.status,
         referral_code: data.referral_code,
         comission_percentage: Number(data.comission_percentage),
         lead_comission_amount: data.lead_comission_amount
@@ -81,6 +85,27 @@ export const EditAffiliateForm = (props: EditAffiliateFormProps) => {
                       <Input {...field} />
                     </FormControl>
                     <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Status:</FormLabel>
+                    <FormControl>
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="CONFIRMATION_PENDING">Esperando confirmação</SelectItem>
+                          <SelectItem value="ACTIVE">Ativo</SelectItem>
+                          <SelectItem value="CANCELED">Cancelado</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
                   </FormItem>
                 )}
               />

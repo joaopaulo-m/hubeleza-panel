@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Clock, CheckCircle2, Phone, User, MessageCircle } from 'lucide-react';
+import { Clock, CheckCircle2, User } from 'lucide-react';
 import { getAccountType, getMe } from '@/lib/api/actions/auth';
 import type { Partner } from '@/types/entities/partner';
 import { AccountType } from '@/types/enums/account-type';
@@ -16,7 +16,7 @@ export const ApprovalPendingDialog = () => {
     async function getAccount() {
       const accountType = await getAccountType()
       if (!accountType) return
-      if (accountType !== AccountType.PARTNER) return
+      if (accountType !== AccountType.PARTNER && accountType !== AccountType.AFFILIATE) return
 
       const account = await getMe()
 

@@ -77,3 +77,40 @@ export function formatDate(timestamp: number): string {
     timeZone: 'America/Sao_Paulo'
   }).format(new Date(timestamp));
 }
+
+function slugifyName(name: string): string {
+  return name
+    .normalize("NFD") // normalize accents
+    .replace(/[\u0300-\u036f]/g, "") // remove diacritics
+    .toLowerCase()
+    .replace(/[^a-z0-9 ]/g, "") // remove non-alphanumeric
+    .trim()
+    .replace(/\s+/g, "-"); // replace spaces with dashes
+}
+
+function generateRandomSuffix(length = 2): string {
+  const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  const array = new Uint8Array(length);
+  window.crypto.getRandomValues(array);
+
+  return Array.from(array, (byte) => characters[byte % characters.length]).join('');
+}
+
+export async function generateAffiliateCodeFromName(name: string, existsFn: (code: string) => Promise<boolean>): Promise<string> {
+  const base = slugifyName(name).slice(0, 12);
+  let attempts = 0;
+
+  while (attempts < 5) {
+    const suffix = generateRandomSuffix(2);
+    const code = `${base}${suffix}`;
+
+    const alreadyExists = await existsFn(code);
+    if (!alreadyExists) {
+      return code;
+    }
+
+    attempts++;
+  }
+
+  return `${base}${Date.now().toString(36).slice(-4)}`;
+}

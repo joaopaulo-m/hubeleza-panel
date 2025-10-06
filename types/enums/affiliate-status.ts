@@ -1,0 +1,5 @@
+export enum AffiliateStatus {
+  CONFIRMATION_PENDING = "CONFIRMATION_PENDING",
+  ACTIVE = "ACTIVE",  
+  CANCELED = "CANCELED"
+}

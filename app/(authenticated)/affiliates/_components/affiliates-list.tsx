@@ -3,6 +3,7 @@ import { AffiliateItem } from "./affiliate-item"
 
 interface AffiliatesListProps {
   name?: string
+  status?: string
   referralCode?: string
 }
 

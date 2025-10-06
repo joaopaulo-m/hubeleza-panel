@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useDebounce } from "@/hooks/use-debounce";
 import type { Treatment } from "@/types/entities/treatment"
 import { Search, X } from "lucide-react";
@@ -15,6 +16,7 @@ export function AffiliatesFilter() {
   
   const [nameQuery, setNameQuery] = useState('');
   const [referralCodeQuery, setReferralCodeQuery] = useState('');
+  const [statusQuery, setStatusQuery] = useState('')
   
   const debouncedNameQuery = useDebounce(nameQuery, 500);
   const debouncedReferralCodeQuery = useDebounce(referralCodeQuery, 500);
@@ -22,6 +24,7 @@ export function AffiliatesFilter() {
   useEffect(() => {
     const nameParam = searchParams.get('name');
     const referralCodeParam = searchParams.get('referralCode');
+    const statusParam = searchParams.get('status');
     
     if (nameParam) {
       setNameQuery(nameParam);
@@ -29,6 +32,10 @@ export function AffiliatesFilter() {
 
     if (referralCodeParam) {
       setReferralCodeQuery(referralCodeParam);
+    }
+
+    if (statusParam) {
+      setStatusQuery(statusParam)
     }
     
   }, [searchParams]);
@@ -55,15 +62,31 @@ export function AffiliatesFilter() {
       referralCodeQuery: debouncedReferralCodeQuery || undefined
     });
   }, [debouncedNameQuery, debouncedReferralCodeQuery, updateURL]);
+
+  const handleStatusChange = (value: string) => {
+    if (value === "ALL") {
+      setStatusQuery('')
+      
+      updateURL({
+        status: undefined
+      })
+    } else {
+      setStatusQuery(value)
+      updateURL({
+        status: value
+      })
+    } 
+  }
     
   const clearAllFilters = () => {
     setNameQuery('');
     setReferralCodeQuery('');
+    setStatusQuery('')
     router.push(pathname);
   };
 
-  const hasFilters = nameQuery || referralCodeQuery;
-  const activeFiltersCount = [nameQuery, referralCodeQuery].filter(Boolean).length;
+  const hasFilters = nameQuery || referralCodeQuery || statusQuery;
+  const activeFiltersCount = [nameQuery, referralCodeQuery, statusQuery].filter(Boolean).length;
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-6">
@@ -114,7 +137,23 @@ export function AffiliatesFilter() {
               />
             </div>
           </div>
+
+          <div className="flex flex-1 flex-col gap-2">
+          <label className="text-sm font-medium text-gray-700">Status</label>
+          <Select value={statusQuery} onValueChange={handleStatusChange}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Selecione um status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">Todos</SelectItem>
+              <SelectItem value="CONFIRMATION_PENDING">Pendente de confirmação</SelectItem>
+              <SelectItem value="ACTIVE">Ativo</SelectItem>
+              <SelectItem value="CANCELED"> Cancelado</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
+        </div>
+
         {/* Active Filters Display */}
         {hasFilters && (
           <div className="pt-4 border-t border-gray-200">
@@ -139,6 +178,18 @@ export function AffiliatesFilter() {
                   <button
                     onClick={() => setReferralCodeQuery('')}
                     className="ml-1 hover:bg-blue-200 rounded-full p-0.5"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </span>
+              )}
+
+              {statusQuery && (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                  Status: "{statusQuery}"
+                  <button
+                    onClick={() => handleStatusChange('')}
+                    className="ml-1 hover:bg-gray-200 rounded-full p-0.5"
                   >
                     <X className="h-3 w-3" />
                   </button>

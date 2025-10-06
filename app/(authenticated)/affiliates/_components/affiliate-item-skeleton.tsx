@@ -15,6 +15,9 @@ export function AffiliateItemSkeleton() {
         <Skeleton className="h-5 w-40 rounded-full" />
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
+        <Skeleton className="h-5 w-40 rounded-full" />
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap">
         <Skeleton className="h-4 w-24" />
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
